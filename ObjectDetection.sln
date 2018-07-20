@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication", "Conso
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PythonApplication", "..\PythonApplication\PythonApplication.pyproj", "{EB85A151-71C1-4212-AAA8-943250796C74}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HarrisConer", "HarrisConer\HarrisConer.vcxproj", "{73170D0C-CC38-4171-B913-AE6FA873F25A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,16 @@ Global
 		{EB85A151-71C1-4212-AAA8-943250796C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB85A151-71C1-4212-AAA8-943250796C74}.Release|x64.ActiveCfg = Release|Any CPU
 		{EB85A151-71C1-4212-AAA8-943250796C74}.Release|x86.ActiveCfg = Release|Any CPU
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Debug|x64.ActiveCfg = Debug|x64
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Debug|x64.Build.0 = Debug|x64
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Debug|x86.ActiveCfg = Debug|Win32
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Debug|x86.Build.0 = Debug|Win32
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Release|Any CPU.ActiveCfg = Release|Win32
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Release|x64.ActiveCfg = Release|x64
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Release|x64.Build.0 = Release|x64
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Release|x86.ActiveCfg = Release|Win32
+		{73170D0C-CC38-4171-B913-AE6FA873F25A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
