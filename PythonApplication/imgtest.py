@@ -55,7 +55,7 @@ class ShapeDetector:
 
 #brief: 主函数
 if __name__=='__main__':
-    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\green\\green3.jpg", cv2.IMREAD_COLOR)
+    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\green\\green1.jpg", cv2.IMREAD_COLOR)
     
     #emmmm, 我觉得这段代码可以使用以下一行带过
     #image = cv2.imread("image")
@@ -79,10 +79,17 @@ if __name__=='__main__':
     #设置绿色区间
     lower_green = np.array([35,43,46])
     upper_green = np.array([110,255,255])
+    #设置黄色区间
+    lower_yellow = np.array([26,43,46])
+    upper_yellow = np.array([34,255,255])
 
+    #分割图像
     mask = cv2.inRange(hsv, lower_green, upper_green)
-    img = cv2.threshold(mask, 60, 255, cv2.THRESH_BINARY)[1]
-    cv2.imshow("hello", img)
+    cv2.imshow("hello", mask)
+    cv2.waitKey(0)
+    #膨胀，消除噪点，（顺便填充一下）
+    img = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=2)
+    cv2.imshow("hello1", img)
     cv2.waitKey(0)
     
     #在二值化图像中寻找识别出的图形
