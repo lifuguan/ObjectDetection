@@ -34,6 +34,20 @@ import imutils
 class ShapeDetector:
     def __init__(self):
         pass
+
+    #位置分析函数
+    def pos_calc(self, pt1, pt2, pt3, pt4):
+        a = pt1[1]-pt2[1]
+     
+        sclope_up = float(float(pt1[1]-pt2[1])/float(pt1[0]-pt2[0]))
+        sclope_down = float(float(pt4[1]-pt3[1])/float(pt4[0]-pt3[0]))
+        sclope_average = float((sclope_down + sclope_up) / 2)
+        point_average = ((pt1[0]+pt2[0]+pt3[0]+pt4[0]) / 4, (pt1[1]+pt2[1]+pt3[1]+pt4[1]) / 4)
+        #显示该物块斜率
+        print  sclope_average
+        #显示该物块中心点
+        print  point_average
+
     def detect(self, c):
         #初始化图形名字并且圈出
         shape = "undentifed"
@@ -55,6 +69,9 @@ class ShapeDetector:
             cv2.line(image, pt3, pt2, (0, 255, 0), 3)
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt1, (0, 255, 0), 3)
+
+            #传入数据进行位置分析
+            self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
 
             #在已经为矩形的前提下，近似判断长宽比
             ar = w / float(h)
@@ -135,7 +152,6 @@ if __name__=='__main__':
             cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
 	        # show the output image
             cv2.imshow("Image", image)
-
             cv2.waitKey(0)
 
 
