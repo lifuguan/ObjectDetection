@@ -55,16 +55,13 @@ class ShapeDetector:
 
 #brief: 主函数
 if __name__=='__main__':
-    image = cv2.imread("sample5.jpg", cv2.IMREAD_COLOR)
+    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\green\\green3.jpg", cv2.IMREAD_COLOR)
     
     #emmmm, 我觉得这段代码可以使用以下一行带过
     #image = cv2.imread("image")
 
     #初始化要调整大小的图像的尺寸并获取图像大小 (有什么用吗)
-    '''
-    @param: 第二个参数是关键
-    '''
-    resized_image = imutils.resize(image, width = 1080, height = 960) #, width=300
+    resized_image = imutils.resize(image, width = 300) #, width=300
     cv2.imshow("hello world", resized_image)
     cv2.waitKey(0)
 
@@ -74,11 +71,17 @@ if __name__=='__main__':
     hsv = cv2.cvtColor(resized_image, cv2.COLOR_BGR2HSV)
    
     #根据上篇博文和比赛情况，设置一个蓝色的区间
-    lower_blue=np.array([40,43,46])
-    upper_blue=np.array([255,255,255])
-    mask = cv2.inRange(hsv, lower_blue, upper_blue)
+    lower_blue = np.array([40,43,46])
+    upper_blue = np.array([255,255,255])
+    #设置红色区间
+    lower_red = np.array([0,43,46])
+    upper_red = np.array([10,255,255])
+    #设置绿色区间
+    lower_green = np.array([35,43,46])
+    upper_green = np.array([110,255,255])
+
+    mask = cv2.inRange(hsv, lower_green, upper_green)
     img = cv2.threshold(mask, 60, 255, cv2.THRESH_BINARY)[1]
-    i = 1
     cv2.imshow("hello", img)
     cv2.waitKey(0)
     
@@ -107,7 +110,7 @@ if __name__=='__main__':
         c = ratio * c
         c = c.astype("int")
         #滤掉噪声 (利用面积大小)
-        if c.size > 200 :
+        if c.size > 100 :
             cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
             cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (255, 255, 255), 2)
 	        # show the output image
