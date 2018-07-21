@@ -29,6 +29,8 @@ import numpy as np
 import imutils  
 #OpenCV辅助（改进）lib
 
+
+
 class ShapeDetector:
     def __init__(self):
         pass
@@ -44,6 +46,16 @@ class ShapeDetector:
         #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
         elif len(approx) == 4:
             (x,y ,w, h) = cv2.boundingRect(approx)
+            #嵌套array
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt1, (0, 255, 0), 3)
+
             #在已经为矩形的前提下，近似判断长宽比
             ar = w / float(h)
             shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
@@ -55,13 +67,13 @@ class ShapeDetector:
 
 #brief: 主函数
 if __name__=='__main__':
-    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\green\\green1.jpg", cv2.IMREAD_COLOR)
+    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\green\\green2.jpg", cv2.IMREAD_COLOR)
     
     #emmmm, 我觉得这段代码可以使用以下一行带过
     #image = cv2.imread("image")
 
     #初始化要调整大小的图像的尺寸并获取图像大小 (有什么用吗)
-    resized_image = imutils.resize(image, width = 300) #, width=300
+    resized_image = imutils.resize(image) #, width=300
     cv2.imshow("hello world", resized_image)
     cv2.waitKey(0)
 
@@ -111,6 +123,7 @@ if __name__=='__main__':
             cY = int((M["m01"] / M["m00"]) * ratio)
         else :
             cX = cY = 0
+        #返回得到名字
         shape = sd.detect(c)
         #处理一下图片
         c = c.astype("float")
@@ -118,8 +131,8 @@ if __name__=='__main__':
         c = c.astype("int")
         #滤掉噪声 (利用面积大小)
         if c.size > 100 :
-            cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
-            cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (255, 255, 255), 2)
+            #cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
+            cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
 	        # show the output image
             cv2.imshow("Image", image)
 
