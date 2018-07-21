@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+
 import cv2
 import numpy as np
 import copy
-
-img = cv2.imread('maze.png')
+ 
+img = cv2.imread('C:\\Users\\10027\\Pictures\\WIN_20170927_17_47_01_Pro.jpg')
 img_orig = copy.copy(img)
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
  
