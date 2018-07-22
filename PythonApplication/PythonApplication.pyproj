@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>eb85a151-71c1-4212-aaa8-943250796c74</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>RunCamera.py</StartupFile>
+    <StartupFile>pythontest.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -12,7 +12,7 @@
     <Name>PythonApplication</Name>
     <RootNamespace>PythonApplication</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|PythonCore|3.6</InterpreterId>
+    <InterpreterId>Global|PythonCore|2.7</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <Environment>C:\opencv\build\include\opencv;
@@ -35,8 +35,14 @@ C:\opencv\build\include;</Environment>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PythonApplication.py" />
+    <Compile Include="pythontest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="RunCamera.py" />
     <Compile Include="ThreadTest.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TrackTour.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

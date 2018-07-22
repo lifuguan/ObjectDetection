@@ -1,58 +1,9 @@
-## -*- coding:utf-8 -*-
-
-#import cv2
-#import numpy as np
-
-#"""
-#功能：读取一张图片，显示出来，转化为HSV色彩空间
-#     并通过滑块调节HSV阈值，实时显示
-#"""
-
-#image = cv2.imread('C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\real1.jpg') # 根据路径读取一张图片
-#cv2.imshow("BGR", image) # 显示图片
-
-#hsv_low =  np.array([100,43, 125])
-#hsv_high = np.array([124,255,155])
-
-## 下面几个函数，写得有点冗余
-
-#def h_low(value):
-#    hsv_low[0] = value
-
-#def h_high(value):
-#    hsv_high[0] = value
-
-#def s_low(value):
-#    hsv_low[1] = value
-
-#def s_high(value):
-#    hsv_high[1] = value
-
-#def v_low(value):
-#    hsv_low[2] = value
-
-#def v_high(value):
-#    hsv_high[2] = value
-
-#cv2.namedWindow('image')
-#cv2.createTrackbar('H low', 'image', 0, 255, h_low) 
-#cv2.createTrackbar('H high', 'image', 0, 255, h_high)
-#cv2.createTrackbar('S low', 'image', 0, 255, s_low)
-#cv2.createTrackbar('S high', 'image', 0, 255, s_high)
-#cv2.createTrackbar('V low', 'image', 0, 255, v_low)
-#cv2.createTrackbar('V high', 'image', 0, 255, v_high)
-
-#while True:
-#    dst = cv2.cvtColor(image, cv2.COLOR_BGR2HSV) # BGR转HSV
-#    dst = cv2.inRange(dst, hsv_low, hsv_high) # 通过HSV的高低阈值，提取图像部分区域
-#    cv2.imshow('dst', dst)
-#    if cv2.waitKey(1) & 0xFF == ord('q'):
-#        break
-#cv2.destroyAllWindows()
-
-
+# -*- coding: utf-8 -*-
 
 import cv2
+
+
+
 import numpy as np
 import imutils
 
@@ -108,25 +59,17 @@ while(1):
 
     # #将格式从BGR——>HSV  HSV颜色区度:https://blog.csdn.net/taily_duan/article/details/51506776
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-   
-    #根据上篇博文和比赛情况，设置一个蓝色的区间
-    lower_blue = np.array([100,43, 46])
-    upper_blue = np.array([124,255,255])
-    #设置红色区间
-    lower_red = np.array([156,43,46])
-    upper_red = np.array([180,255,255])
-    #设置绿色区间
-    lower_green = np.array([35,43,77])
-    upper_green = np.array([96,255,255])
-    #设置黄色区间
-    lower_yellow = np.array([13,43,46])
-    upper_yellow = np.array([42,255,255])
+    hsv = hsv[0: 480, 0: 640]
+
+    #设置黑色
+    lower_black = np.array([0,0,0])
+    upper_black = np.array([180,255,46])
     #分割图像
-    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    mask = cv2.inRange(hsv, lower_black, upper_black)
 
     kernel = np.ones((5,5),np.uint8)  
     erosion = cv2.erode(mask,kernel,iterations = 1)
-    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=16)
+    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=3)
 
     cv2.imshow("oengzhang", img)
 
@@ -161,6 +104,6 @@ while(1):
         cv2.imshow("Image", image)
 
 
-    if cv2.waitKey(30) & 0xFF == ord('q'):
+    if cv2.waitKey(50) & 0xFF == ord('q'):
         break
    
