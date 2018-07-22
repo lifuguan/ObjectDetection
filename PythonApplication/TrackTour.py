@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 
+'''
+@All right reserved.
+@summary: used to track the black line to correct the diretion of the car
+@author: LiHao
+@date: 2018.7.22
+@refer: https://www.opencv-python-tutroals.readthedocs.io
+@location: DJI
+'''
+
+
 import cv2
-
-
-
 import numpy as np
 import imutils
 
+
+#用于识别
 class ShapeDetector:
     def __init__(self):
         pass
@@ -46,7 +55,7 @@ class ShapeDetector:
             shape = "circle"
         return shape
 
-
+#初始化， 
 cap = cv2.VideoCapture(2)
 cap.set(3, 1280)
 cap.set(4, 480)
@@ -104,6 +113,6 @@ while(1):
         cv2.imshow("Image", image)
 
 
-    if cv2.waitKey(50) & 0xFF == ord('q'):
+    if cv2.waitKey(50) & 0xFF == ord(' '):
         break
    

@@ -63,7 +63,7 @@ class ShapeDetector:
         #初始化图形名字并且圈出
         shape = "undentifed"
         peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+        approx = cv2.approxPolyDP(c, 0.055 * peri, True)
 
         #三角形有三个角
         if len(approx) == 3:
@@ -91,6 +91,30 @@ class ShapeDetector:
 
         elif len(approx) == 5:
             shape = "pentagon"
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[4][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt1, pt5, (0, 255, 0), 3)
+        elif len(approx) == 6:
+            shape = "Hexagon"
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[4][0])
+            pt6 = tuple(approx[5][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt6, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt1, pt6, (0, 255, 0), 3)
         else:
             shape = "circle"
         return shape
@@ -113,8 +137,8 @@ while(1):
     lower_blue = np.array([100,43, 46])
     upper_blue = np.array([124,255,255])
     #设置红色区间
-    lower_red = np.array([156,43,46])
-    upper_red = np.array([180,255,255])
+    lower_red = np.array([0,43,46])
+    upper_red = np.array([10,255,255])
     #设置绿色区间
     lower_green = np.array([35,43,77])
     upper_green = np.array([96,255,255])
@@ -122,11 +146,11 @@ while(1):
     lower_yellow = np.array([13,43,46])
     upper_yellow = np.array([42,255,255])
     #分割图像
-    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    mask = cv2.inRange(hsv, lower_blue, upper_blue)
 
-    kernel = np.ones((5,5),np.uint8)  
-    erosion = cv2.erode(mask,kernel,iterations = 1)
-    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=16)
+    kernel = np.ones((3,3),np.uint8)  
+    erosion = cv2.erode(mask,kernel,iterations = 2)
+    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=15)
 
     cv2.imshow("oengzhang", img)
 

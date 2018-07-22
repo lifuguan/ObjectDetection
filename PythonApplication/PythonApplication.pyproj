@@ -28,6 +28,9 @@ C:\opencv\build\include;</Environment>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ColorAndShapeDetect.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DetectShape.py">
       <SubType>Code</SubType>
     </Compile>
