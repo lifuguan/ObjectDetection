@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>eb85a151-71c1-4212-aaa8-943250796c74</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>imgtest.py</StartupFile>
+    <StartupFile>RunCamera.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -12,7 +12,7 @@
     <Name>PythonApplication</Name>
     <RootNamespace>PythonApplication</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|PythonCore|2.7</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.6</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <Environment>C:\opencv\build\include\opencv;
@@ -35,12 +35,14 @@ C:\opencv\build\include;</Environment>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PythonApplication.py" />
-    <Compile Include="RunCamera.py">
+    <Compile Include="RunCamera.py" />
+    <Compile Include="ThreadTest.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|2.7" />
+    <InterpreterReference Include="Global|PythonCore|3.6" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
