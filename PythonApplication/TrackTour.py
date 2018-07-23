@@ -12,41 +12,42 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-
+import math
 import numpy as np
 import imutils
 
 class ShapeDetector:
     def __init__(self):
         pass
+
     #位置分析函数
-    def pos_calc(self, pt1, pt2, pt3, pt4) :
+    def pos_calc(self, pt1, pt2, pt3, pt4, center_point) :
         slope_up = 0
         height  = 0.1
         width   = 0.1
         if pt2[1] + 10 > 200 :
             cv2.putText(image, "p1 ", (pt1[0], pt1[1] + 10) , cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p1位置
             cv2.putText(image, "p2 ", (pt2[0], pt2[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
-            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
-            cv2.putText(image, "p4 ", (pt4[0], pt4[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p3位置 
+            cv2.putText(image, "p4 ", (pt4[0], pt4[1] + 10), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p4位置 
             height = float(pt1[1]-pt2[1])  
-            width = float(pt1[0]-pt2[0])
-        elif pt2[1] + 10 <100 :
+            width = float(-pt1[0]+pt2[0])
+        elif pt2[1] + 10 < 100 :
+            #修正摄像头左移
             cv2.putText(image, "p1 ", (pt1[0], pt1[1] + 10) , cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p1位置
             cv2.putText(image, "p2 ", (pt2[0], pt2[1] + 10), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
-            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
-            cv2.putText(image, "p4 ", (pt4[0], pt4[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置
+            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p3位置 
+            cv2.putText(image, "p4 ", (pt4[0], pt4[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p4位置
             height = float(pt2[1]-pt3[1])  
-            width = float(pt2[0]-pt3[0])
+            width = float(-pt2[0]+pt3[0])
         #初中数学斜率法
-
-
         if not height!=0 or width!=0:
             slope_up = float(height/width)
         elif height :
             slope_up = 50 #让斜率大于阀值
 
-        #显示该物块斜率
+        x = pow((320 - center_point[0]) * 2, 2)
+        y = pow(slope_up * , 2)
         
         #根据角度分析行进方向
         status = ["true", "left", "right"]
@@ -177,27 +178,25 @@ while(1):
 
     sd = ShapeDetector()
     for c in cnts:
-        #以下为垃圾代码
-        M = cv2.moments(c)
-        #返回得到名字
-        shape, approx = sd.detect(c)
-
-        if M["m10"] != 0:
-        #表示图像重心
-            cX_ = int((M["m10"] / M["m00"]) * ratio)
-            cY_ = int((M["m01"] / M["m00"]) * ratio)
-        else :
-            cX = cY = 0
-
-        #处理一下图片
-        c = c.astype("float")
-        c = ratio * c
-        c = c.astype("int")
-        cv2.line(image, (320, 0) , (320, 480) , (0, 0 , 200), 4) 
-
         #滤掉噪声 (利用面积大小)
         if c.size > 500 :
+            #以下为垃圾代码
+            M = cv2.moments(c)
+            #返回得到名字
+            shape, approx = sd.detect(c)
 
+            if M["m10"] != 0:
+            #表示图像重心
+                cX_ = int((M["m10"] / M["m00"]) * ratio)
+                cY_ = int((M["m01"] / M["m00"]) * ratio)
+            else :
+                cX = cY = 0
+            #处理一下图片
+            c = c.astype("float")
+            c = ratio * c
+            c = c.astype("int")
+
+            cv2.line(image, (320, 0) , (320, 480) , (0, 0 , 200), 4) 
             #圈出黑线
             sd.drawLine(shape, approx)
             #质心辅助线
@@ -208,23 +207,27 @@ while(1):
             cv2.line(image, (cX_, cY_) , (cX_, cY_) , (255, 255 , 255), 5)  #描绘出质心
             cv2.putText(image, "position " + str((cX_, cY_)), (cX_, cY_+20), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #质心位置
             pos_status = ["true", "left", "right"]
+            #小车跑到右边去啦
             if cX_>340:
                 cv2.putText(image, "Left Off", (340, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
+            #小车跑到左边去啦
             elif cX_ <300:
                 cv2.putText(image, "Right Off", (220, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
             else :
-                #传入数据进行位置分析
-                angle_status = sd.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
-                if angle_status == "true":
-                    cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
-                elif angle_status == "left":
-                    cv2.putText(image, "Go right!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
-                elif angle_status == "right":
-                    cv2.putText(image, "Go left!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                #避免出现三角形时pos_calc()报错
+                if shape == "rectangle" or shape == "square":
+                    #在小车位置未偏离的情况下, 传入数据进行位置分析
+                    angle_status = sd.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0], (cX_, cY_))
+                    if angle_status == "true":
+                        cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                    elif angle_status == "left":
+                        cv2.putText(image, "Go right!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                    elif angle_status == "right":
+                        cv2.putText(image, "Go left!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
         #图像显示
         cv2.imshow("Image", image)
 
     cv2.waitKey(0)
-    # if cv2.waitKey(10) & 0xFF == ord('q'):
-    #     break
+    #if cv2.waitKey(50) & 0xFF == ord('q'):
+    #    break
    
