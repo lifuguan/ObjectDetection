@@ -31,9 +31,14 @@ lower_yellow = np.array([13,43,46])
 upper_yellow = np.array([42,255,255])
 
 
+
+
 class ShapeDetector:
     def __init__(self):
         pass
+
+    def drawRetangle(self, color):
+        pass    
     #初始化图形名字并且圈出
     def detect(self, c):
         shape = "undentifed"
@@ -52,10 +57,10 @@ class ShapeDetector:
             pt2 = tuple(approx[1][0])
             pt3 = tuple(approx[2][0])
             pt4 = tuple(approx[3][0])
-            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt1, (0, 255, 0), 3)
+            cv2.line(frame, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt1, (0, 255, 0), 3)
             
             #传入数据进行位置分析
             #self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
@@ -72,11 +77,11 @@ class ShapeDetector:
             pt3 = tuple(approx[2][0])
             pt4 = tuple(approx[3][0])
             pt5 = tuple(approx[4][0])
-            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
-            cv2.line(image, pt1, pt5, (0, 255, 0), 3)
+            cv2.line(frame, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(frame, pt1, pt5, (0, 255, 0), 3)
         elif len(approx) == 6:
             shape = "Hexagon"
             pt1 = tuple(approx[0][0])
@@ -85,12 +90,12 @@ class ShapeDetector:
             pt4 = tuple(approx[3][0])
             pt5 = tuple(approx[4][0])
             pt6 = tuple(approx[5][0])
-            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
-            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
-            cv2.line(image, pt6, pt5, (0, 255, 0), 3)
-            cv2.line(image, pt1, pt6, (0, 255, 0), 3)
+            cv2.line(frame, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(frame, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(frame, pt6, pt5, (0, 255, 0), 3)
+            cv2.line(frame, pt1, pt6, (0, 255, 0), 3)
         else:
             shape = "circle"
         return shape
@@ -134,7 +139,7 @@ class Detect_Thread:
             #滤掉噪声 (利用面积大小)
             if c.size > 150 :
                 cv2.putText(origin_img, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
-                self.img_blue = cnts_blue
+                self.img_blue = c
         pass
 
     def detect_yellow(self, mask):
@@ -161,7 +166,7 @@ class Detect_Thread:
             if c.size > 100 :
                 
                 cv2.putText(origin_img, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
-        self.img_red = cnts_yellow
+        self.img_red = c
         pass
 
     #红色待定
@@ -188,7 +193,7 @@ class Detect_Thread:
             #滤掉噪声 (利用面积大小)
             if c.size > 150 :
                 cv2.putText(origin_img, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
-                self.img_red =  cnts_red
+                self.img_red =  c
         pass
 
     def detect_green(self, mask):
@@ -214,7 +219,7 @@ class Detect_Thread:
             #滤掉噪声 (利用面积大小)
             if c.size > 100 :
                 cv2.putText(origin_img, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
-                self.img_green = cnts_green
+                self.img_green = c
         pass
 
 
@@ -225,25 +230,26 @@ if __name__=='__main__':
     cap.set(3, 1280) #设置长
     cap.set(4, 480)  #设置短
     while True:
+        global frame
         ret, frame = cap.read()
         resized_image = imutils.resize(frame)
         ratio = frame.shape[0] / float(frame.shape[0])
         #将格式从BGR——>HSV  HSV颜色区度:https://blog.csdn.net/taily_duan/article/details/51506776
         hsv = cv2.cvtColor(resized_image, cv2.COLOR_BGR2HSV)
         #多线程节省运算时间
-        th_blue = threading.Thread(target=Detect_Thread.detect_blue, args=(hsv, frame, ))
+        th_blue = threading.Thread(target=Detect_Thread.detect_blue, args=(hsv, ))
         th_blue.start()
         th_blue.join()
 
-        th_yellow = threading.Thread(target=Detect_Thread.detect_yellow, args=(hsv, frame, ))
+        th_yellow = threading.Thread(target=Detect_Thread.detect_yellow, args=(hsv, ))
         th_yellow.start()
         th_yellow.join()
 
-        th_red = threading.Thread(target=Detect_Thread.detect_red, args=(hsv, frame, ))
+        th_red = threading.Thread(target=Detect_Thread.detect_red, args=(hsv, ))
         th_red.start()
         th_red.join()
 
-        th_green = threading.Thread(target=Detect_Thread.detect_green, args=(hsv,frame, ))
+        th_green = threading.Thread(target=Detect_Thread.detect_green, args=(hsv, ))
         th_green.start()
         th_green.join()
         

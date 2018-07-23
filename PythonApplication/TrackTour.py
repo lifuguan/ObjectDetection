@@ -9,28 +9,20 @@
 @location: DJI
 '''
 
+# -*- coding: utf-8 -*-
 
 import cv2
+
 import numpy as np
 import imutils
 
-
-#用于识别
 class ShapeDetector:
     def __init__(self):
         pass
-    def detect(self, c):
-        #初始化图形名字并且圈出
-        shape = "undentifed"
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+    def drawLine(self, shape, approx):
+                #三角形有三个角
 
-        #三角形有三个角
-        if len(approx) == 3:
-            shape = "triangle"
-        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
-        elif len(approx) == 4:
-            (x,y ,w, h) = cv2.boundingRect(approx)
+        if shape == "rectangle" or shape == "sqaure":
             #嵌套array
             pt1 = tuple(approx[0][0])
             pt2 = tuple(approx[1][0])
@@ -40,7 +32,56 @@ class ShapeDetector:
             cv2.line(image, pt3, pt2, (0, 255, 0), 3)
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt1, (0, 255, 0), 3)
-            
+        elif shape == "pentagon" :
+            #嵌套array
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[3][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt5, pt1, (0, 255, 0), 3)
+        elif shape == "cross" :
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[4][0])
+            pt6 = tuple(approx[5][0])
+            pt7 = tuple(approx[6][0])
+            pt8 = tuple(approx[7][0])
+            pt9 = tuple(approx[8][0])
+            pt10 = tuple(approx[9][0])
+            pt11 = tuple(approx[10][0])
+            pt12 = tuple(approx[11][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt5, pt6, (0, 255, 0), 3)
+            cv2.line(image, pt7, pt6, (0, 255, 0), 3)
+            cv2.line(image, pt7, pt8, (0, 255, 0), 3)
+            cv2.line(image, pt9, pt8, (0, 255, 0), 3)
+            cv2.line(image, pt10, pt9, (0, 255, 0), 3)
+            cv2.line(image, pt11, pt10, (0, 255, 0), 3)
+            cv2.line(image, pt12, pt11, (0, 255, 0), 3)
+            pass
+
+    #初始化图形名字并且圈出
+    def detect(self, c):
+        shape = "undentifed"
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
+        #三角形有三个角
+        if len(approx) == 3:
+            shape = "triangle"
+        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
+        elif len(approx) == 4:
+            (x,y ,w, h) = cv2.boundingRect(approx)   
             #传入数据进行位置分析
             #self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
 
@@ -53,9 +94,11 @@ class ShapeDetector:
             shape = "pentagon"
         else:
             shape = "circle"
-        return shape
+        return shape, approx
 
-#初始化， 
+
+
+
 cap = cv2.VideoCapture(2)
 cap.set(3, 1280)
 cap.set(4, 480)
@@ -92,7 +135,7 @@ while(1):
         #以下为垃圾代码
         M = cv2.moments(c)
         #返回得到名字
-        shape = sd.detect(c)
+        shape, approx = sd.detect(c)
 
         if M["m10"] != 0:
         #表示图像重心
@@ -106,13 +149,13 @@ while(1):
         c = ratio * c
         c = c.astype("int")
         #滤掉噪声 (利用面积大小)
-        if c.size > 150 :
-            
-            cv2.putText(image, shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+        if c.size > 400 :
+            cv2.putText(image, "color " + shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            sd.drawLine(shape, approx)
             # show the output image
         cv2.imshow("Image", image)
 
 
-    if cv2.waitKey(50) & 0xFF == ord(' '):
+    if cv2.waitKey(50) & 0xFF == ord('q'):
         break
    

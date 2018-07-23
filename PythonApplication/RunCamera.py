@@ -130,7 +130,7 @@ while(1):
     
     ratio = image.shape[0] / float(image.shape[0])
 
-    # #将格式从BGR——>HSV  HSV颜色区度:https://blog.csdn.net/taily_duan/article/details/51506776
+    #将格式从BGR——>HSV  HSV颜色区度:https://blog.csdn.net/taily_duan/article/details/51506776
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
    
     #根据上篇博文和比赛情况，设置一个蓝色的区间

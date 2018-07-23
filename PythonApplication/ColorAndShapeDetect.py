@@ -19,7 +19,6 @@ import imutils
 class ShapeDetector:
     def __init__(self):
         pass
-
     #位置分析函数
     def pos_calc(self, pt1, pt2, pt3, pt4):
         a = pt1[1]-pt2[1]
@@ -32,19 +31,19 @@ class ShapeDetector:
         print  sclope_average
         #显示该物块中心点
         print  point_average
-
-    def detect(self, c):
-        #初始化图形名字并且圈出
-        shape = "undentifed"
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
-
-        #三角形有三个角
+        pass
+    #画出轮廓
+    def drawLine(self, shape, approx):
+                #三角形有三个角
         if len(approx) == 3:
             shape = "triangle"
-        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
-        elif len(approx) == 4:
-            (x,y ,w, h) = cv2.boundingRect(approx)
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt1, (0, 255, 0), 3)
+        elif shape == "rectangle" or shape == "sqaure":
             #嵌套array
             pt1 = tuple(approx[0][0])
             pt2 = tuple(approx[1][0])
@@ -54,18 +53,45 @@ class ShapeDetector:
             cv2.line(image, pt3, pt2, (0, 255, 0), 3)
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt1, (0, 255, 0), 3)
+        elif shape == "pentagon" :
+            #嵌套array
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[3][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt5, pt1, (0, 255, 0), 3)
+            pass
 
+    #初始化图形名字并且圈出
+    def detect(self, c):
+        shape = "undentifed"
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
+        #三角形有三个角
+        if len(approx) == 3:
+            shape = "triangle"
+        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
+        elif len(approx) == 4:
+            (x,y ,w, h) = cv2.boundingRect(approx)   
             #传入数据进行位置分析
             #self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
 
             #在已经为矩形的前提下，近似判断长宽比
             ar = w / float(h)
             shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
+            #return shape , approx[0][0], approx[1][0], approx[2][0], approx[3][0]
+
         elif len(approx) == 5:
             shape = "pentagon"
         else:
             shape = "circle"
-        return shape 
+        return shape, approx
 
 #brief: 主函数
 if __name__=='__main__':
@@ -159,14 +185,15 @@ if __name__=='__main__':
             else :
                 cX = cY = 0
             #返回得到名字
-            shape = sd_blue.detect(c)
+            shape, approx = sd_blue.detect(c)
             #处理一下图片
             c = c.astype("float")
             c = ratio * c
             c = c.astype("int")
             #滤掉噪声 (利用面积大小)
-            if c.size > 100 :
-                cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            if c.size > 300 :
+                cv2.putText(image, "blue " + shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+                sd_blue.drawLine(shape, approx)
 
 
 
@@ -181,14 +208,15 @@ if __name__=='__main__':
             else :
                 cX = cY = 0
             #返回得到名字
-            shape = sd_red.detect(c)
+            shape, approx = sd_red.detect(c)
             #处理一下图片
             c = c.astype("float")
             c = ratio * c
             c = c.astype("int")
             #滤掉噪声 (利用面积大小)
-            if c.size > 100 :
-                cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            if c.size > 300 :
+                cv2.putText(image, "red " + shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+                sd_red.drawLine(shape, approx)
 
 
 
@@ -202,14 +230,15 @@ if __name__=='__main__':
             else :
                 cX = cY = 0
             #返回得到名字
-            shape = sd_green.detect(c)
+            shape, approx = sd_green.detect(c)
             #处理一下图片
             c = c.astype("float")
             c = ratio * c
             c = c.astype("int")
             #滤掉噪声 (利用面积大小)
-            if c.size > 100 :
-                cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            if c.size > 300 :
+                cv2.putText(image, "green" + shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+                sd_green.drawLine(shape, a)
 
 
         for c in cnts_yellow:
@@ -222,14 +251,15 @@ if __name__=='__main__':
             else :
                 cX = cY = 0
             #返回得到名字
-            shape = sd_yellow.detect(c)
+            shape, approx = sd_yellow.detect(c)
             #处理一下图片
             c = c.astype("float")
             c = ratio * c
             c = c.astype("int")
             #滤掉噪声 (利用面积大小)
-            if c.size > 150 :
-                cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            if c.size > 300 :
+                cv2.putText(image, "yellow" + shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+                sd_yellow.drawLine(shape, approx)
                 # show the output image
                 cv2.imshow("Image", image)
             if cv2.waitKey(30) & 0xFF == ord('q'):

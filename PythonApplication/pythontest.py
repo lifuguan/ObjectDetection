@@ -2,26 +2,23 @@
 
 import cv2
 
-
-
 import numpy as np
 import imutils
 
 class ShapeDetector:
     def __init__(self):
         pass
-    def detect(self, c):
-        #初始化图形名字并且圈出
-        shape = "undentifed"
-        peri = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
-
-        #三角形有三个角
+    def drawLine(self, shape, approx):
+                #三角形有三个角
         if len(approx) == 3:
             shape = "triangle"
-        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
-        elif len(approx) == 4:
-            (x,y ,w, h) = cv2.boundingRect(approx)
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt1, (0, 255, 0), 3)
+        elif shape == "rectangle" or shape == "sqaure":
             #嵌套array
             pt1 = tuple(approx[0][0])
             pt2 = tuple(approx[1][0])
@@ -31,7 +28,32 @@ class ShapeDetector:
             cv2.line(image, pt3, pt2, (0, 255, 0), 3)
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt1, (0, 255, 0), 3)
-            
+        elif shape == "pentagon" :
+            #嵌套array
+            pt1 = tuple(approx[0][0])
+            pt2 = tuple(approx[1][0])
+            pt3 = tuple(approx[2][0])
+            pt4 = tuple(approx[3][0])
+            pt5 = tuple(approx[3][0])
+            cv2.line(image, pt1, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt3, pt2, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt3, (0, 255, 0), 3)
+            cv2.line(image, pt4, pt5, (0, 255, 0), 3)
+            cv2.line(image, pt5, pt1, (0, 255, 0), 3)
+            pass
+
+    #初始化图形名字并且圈出
+    def detect(self, c):
+        shape = "undentifed"
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
+        #三角形有三个角
+        if len(approx) == 3:
+            shape = "triangle"
+        #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
+        elif len(approx) == 4:
+            (x,y ,w, h) = cv2.boundingRect(approx)   
             #传入数据进行位置分析
             #self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
 
@@ -44,7 +66,9 @@ class ShapeDetector:
             shape = "pentagon"
         else:
             shape = "circle"
-        return shape
+        return shape, approx
+
+
 
 
 cap = cv2.VideoCapture(2)
@@ -83,7 +107,7 @@ while(1):
         #以下为垃圾代码
         M = cv2.moments(c)
         #返回得到名字
-        shape = sd.detect(c)
+        shape, approx = sd.detect(c)
 
         if M["m10"] != 0:
         #表示图像重心
@@ -91,15 +115,14 @@ while(1):
             cY_ = int((M["m01"] / M["m00"]) * ratio)
         else :
             cX = cY = 0
-
         #处理一下图片
         c = c.astype("float")
         c = ratio * c
         c = c.astype("int")
         #滤掉噪声 (利用面积大小)
-        if c.size > 150 :
-            
-            cv2.putText(image, shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+        if c.size > 300 :
+            cv2.putText(image, "color " + shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+            sd.drawLine(shape, approx)
             # show the output image
         cv2.imshow("Image", image)
 
