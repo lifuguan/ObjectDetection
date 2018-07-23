@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>eb85a151-71c1-4212-aaa8-943250796c74</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>pythontest.py</StartupFile>
+    <StartupFile>TrackTour.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

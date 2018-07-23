@@ -19,6 +19,49 @@ import imutils
 class ShapeDetector:
     def __init__(self):
         pass
+    #位置分析函数
+    def pos_calc(self, pt1, pt2, pt3, pt4) :
+        slope_up = 0
+        height  = 0.1
+        width   = 0.1
+        if pt2[1] + 10 > 200 :
+            cv2.putText(image, "p1 ", (pt1[0], pt1[1] + 10) , cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p1位置
+            cv2.putText(image, "p2 ", (pt2[0], pt2[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            cv2.putText(image, "p4 ", (pt4[0], pt4[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            height = float(pt1[1]-pt2[1])  
+            width = float(pt1[0]-pt2[0])
+        elif pt2[1] + 10 <100 :
+            cv2.putText(image, "p1 ", (pt1[0], pt1[1] + 10) , cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p1位置
+            cv2.putText(image, "p2 ", (pt2[0], pt2[1] + 10), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            cv2.putText(image, "p3 ", (pt3[0], pt3[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置 
+            cv2.putText(image, "p4 ", (pt4[0], pt4[1] - 5), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #p2位置
+            height = float(pt2[1]-pt3[1])  
+            width = float(pt2[0]-pt3[0])
+        #初中数学斜率法
+
+
+        if not height!=0 or width!=0:
+            slope_up = float(height/width)
+        elif height :
+            slope_up = 50 #让斜率大于阀值
+
+        #显示该物块斜率
+        
+        #根据角度分析行进方向
+        status = ["true", "left", "right"]
+        if slope_up > 13 or slope_up < -13:
+            print  slope_up
+            return status[0]
+        elif slope_up > 0:
+            print slope_up
+            return status[2]
+        elif slope_up < 0:
+            print slope_up
+            return status[1]
+
+        pass
+
     def drawLine(self, shape, approx):
                 #三角形有三个角
 
@@ -32,6 +75,7 @@ class ShapeDetector:
             cv2.line(image, pt3, pt2, (0, 255, 0), 3)
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt1, (0, 255, 0), 3)
+
         elif shape == "pentagon" :
             #嵌套array
             pt1 = tuple(approx[0][0])
@@ -44,6 +88,7 @@ class ShapeDetector:
             cv2.line(image, pt4, pt3, (0, 255, 0), 3)
             cv2.line(image, pt4, pt5, (0, 255, 0), 3)
             cv2.line(image, pt5, pt1, (0, 255, 0), 3)
+
         elif shape == "cross" :
             pt1 = tuple(approx[0][0])
             pt2 = tuple(approx[1][0])
@@ -69,6 +114,7 @@ class ShapeDetector:
             cv2.line(image, pt11, pt10, (0, 255, 0), 3)
             cv2.line(image, pt12, pt11, (0, 255, 0), 3)
             pass
+            pass
 
     #初始化图形名字并且圈出
     def detect(self, c):
@@ -82,8 +128,7 @@ class ShapeDetector:
         #四边形有四个角  (我是真不知道他怎么分辨四边形和矩形，和ar有关吗)
         elif len(approx) == 4:
             (x,y ,w, h) = cv2.boundingRect(approx)   
-            #传入数据进行位置分析
-            #self.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
+
 
             #在已经为矩形的前提下，近似判断长宽比
             ar = w / float(h)
@@ -115,13 +160,13 @@ while(1):
 
     #设置黑色
     lower_black = np.array([0,0,0])
-    upper_black = np.array([180,255,46])
+    upper_black = np.array([100,100,46])
     #分割图像
     mask = cv2.inRange(hsv, lower_black, upper_black)
 
-    kernel = np.ones((5,5),np.uint8)  
+    kernel = np.ones((2,2),np.uint8)  
     erosion = cv2.erode(mask,kernel,iterations = 1)
-    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=3)
+    img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=4)
 
     cv2.imshow("oengzhang", img)
 
@@ -148,14 +193,38 @@ while(1):
         c = c.astype("float")
         c = ratio * c
         c = c.astype("int")
+        cv2.line(image, (320, 0) , (320, 480) , (0, 0 , 200), 4) 
+
         #滤掉噪声 (利用面积大小)
-        if c.size > 400 :
-            cv2.putText(image, "color " + shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
+        if c.size > 500 :
+
+            #圈出黑线
             sd.drawLine(shape, approx)
-            # show the output image
+            #质心辅助线
+            cv2.line(image, (cX_, cY_) , (0, cY_) , (255, 255 , 255), 1) 
+            cv2.line(image, (cX_, cY_) , (cX_, 0) , (255, 255 , 255), 1) 
+            
+            cv2.putText(image, "black line " + shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #线的形状
+            cv2.line(image, (cX_, cY_) , (cX_, cY_) , (255, 255 , 255), 5)  #描绘出质心
+            cv2.putText(image, "position " + str((cX_, cY_)), (cX_, cY_+20), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #质心位置
+            pos_status = ["true", "left", "right"]
+            if cX_>340:
+                cv2.putText(image, "Left Off", (340, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
+            elif cX_ <300:
+                cv2.putText(image, "Right Off", (220, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
+            else :
+                #传入数据进行位置分析
+                angle_status = sd.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0])
+                if angle_status == "true":
+                    cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                elif angle_status == "left":
+                    cv2.putText(image, "Go right!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                elif angle_status == "right":
+                    cv2.putText(image, "Go left!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+        #图像显示
         cv2.imshow("Image", image)
 
-
-    if cv2.waitKey(50) & 0xFF == ord('q'):
-        break
+    cv2.waitKey(0)
+    # if cv2.waitKey(10) & 0xFF == ord('q'):
+    #     break
    
