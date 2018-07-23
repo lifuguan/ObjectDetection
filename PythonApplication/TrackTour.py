@@ -46,20 +46,21 @@ class ShapeDetector:
         elif height :
             slope_up = 50 #让斜率大于阀值
 
-        x = pow((320 - center_point[0]) * 2, 2)
-        y = pow(slope_up * , 2)
+        x = math.pow(abs(320 - center_point[0]), 2) #获取镜头中心与质点的横距离，并开平方
+        y = math.pow(abs(slope_up *(320 - center_point[0])) , 2)  #获取镜头中心与质点的纵距离，并开平方
+        dst = math.sqrt(int(+y))
         
         #根据角度分析行进方向
         status = ["true", "left", "right"]
-        if slope_up > 13 or slope_up < -13:
+        if slope_up >= 13 or slope_up <= -13:
             print  slope_up
-            return status[0]
+            return status[0], dst
         elif slope_up > 0:
             print slope_up
-            return status[2]
+            return status[2], dst
         elif slope_up < 0:
             print slope_up
-            return status[1]
+            return status[1], dst
 
         pass
 
@@ -206,18 +207,23 @@ while(1):
             cv2.putText(image, "black line " + shape, (cX_, cY_), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #线的形状
             cv2.line(image, (cX_, cY_) , (cX_, cY_) , (255, 255 , 255), 5)  #描绘出质心
             cv2.putText(image, "position " + str((cX_, cY_)), (cX_, cY_+20), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #质心位置
-            pos_status = ["true", "left", "right"]
-            #小车跑到右边去啦
-            if cX_>340:
-                cv2.putText(image, "Left Off", (340, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
-            #小车跑到左边去啦
-            elif cX_ <300:
-                cv2.putText(image, "Right Off", (220, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
-            else :
-                #避免出现三角形时pos_calc()报错
-                if shape == "rectangle" or shape == "square":
-                    #在小车位置未偏离的情况下, 传入数据进行位置分析
-                    angle_status = sd.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0], (cX_, cY_))
+
+
+            #避免出现三角形时pos_calc()报错
+            if shape == "rectangle" or shape == "square":
+                pos_status = ["true", "left", "right"]
+                angle_status, dst = sd.pos_calc(approx[0][0], approx[1][0], approx[2][0], approx[3][0], (cX_, cY_))
+                #小车跑到右边去啦
+                if cX_>340:
+                    cv2.putText(image, "Left Off", (340, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状
+                    cv2.putText(image, "distance " + str(dst), (cX_, cY_+40), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #打印偏移距离
+                #小车跑到左边去啦                                                                                                   
+                elif cX_ <300:                                                                                                     
+                    cv2.putText(image, "Right Off", (340, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #线的形状       
+                    cv2.putText(image, "distance " + str(dst), (cX_, cY_+40), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #打印偏移距离
+                else :                                                                                                             
+                    #在小车位置未偏离的情况下, 传入数据进行位置分析                                                                    
+                    cv2.putText(image, "distance " + str(dst), (cX_, cY_+40), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #打印偏移距离
                     if angle_status == "true":
                         cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
                     elif angle_status == "left":
@@ -227,7 +233,7 @@ while(1):
         #图像显示
         cv2.imshow("Image", image)
 
-    cv2.waitKey(0)
-    #if cv2.waitKey(50) & 0xFF == ord('q'):
-    #    break
+    #cv2.waitKey(0)
+    if cv2.waitKey(50) & 0xFF == ord('q'):
+        break
    
