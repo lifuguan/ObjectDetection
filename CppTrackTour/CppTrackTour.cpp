@@ -20,8 +20,8 @@ Mat frame;
 string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst)
 {
 	float slope_up = 0;
-	float height = 0, width = 0;
-	if (pt1.y + 10 > 200)
+	float height = 0.1, width = 0.1;
+	if (pt2.y + 10 > 200)
 	{
 		putText(frame, "p1", Point(pt1.x, pt1.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p1 位置
 		putText(frame, "p2", Point(pt2.x, pt2.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p2位置
@@ -44,26 +44,26 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 	if (height != 0 && width != 0)
 		slope_up = float(height / width);
 	else if (true)
-		slope_up = 50;//让斜率大于阈值
+		slope_up = 20;//让斜率大于阈值
 
-	float x = pow(abs(320 - center_point.x), 2);//获取镜头中心与质点的横距离并平方
-	float y = pow(abs(slope_up*(320 - center_point.x)), 2); //获取镜头中心与质点的纵距离，并开平方
+	float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
+	float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
 	dst = sqrt(x + y);
 
 	//根据角度分析行进方向
 	if (slope_up >= 13 || slope_up <= -13)
 	{
-		printf("%f", slope_up);
+		printf("%f\n", slope_up);
 		return "true";
 	}
 	else if (slope_up > 0)
 	{
-		printf("%f", slope_up);
+		printf("%f\n", slope_up);
 		return "left";
 	}
 	else if (slope_up < 0)
 	{
-		printf("%f", slope_up);
+		printf("%f\n", slope_up);
 		return "right";
 	}
 
@@ -266,6 +266,7 @@ int main()
 			}
 		}
 		imshow("Result Frame", frame);
+		//waitKey(50);
 		if (waitKey(50) == 'q')
 		{
 			break;
