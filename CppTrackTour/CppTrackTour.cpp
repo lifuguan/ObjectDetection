@@ -14,10 +14,13 @@ using namespace cv;
 
 Mat frame;
 
+/*
+*@brief: 位置分析函数
+*/
 string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst)
 {
 	float slope_up = 0;
-	float height = 0.1, width = 0.1;
+	float height = 0, width = 0;
 	if (pt1.y + 10 > 200)
 	{
 		putText(frame, "p1", Point(pt1.x, pt1.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p1 位置
@@ -36,37 +39,41 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		putText(frame, "p4 ", Point(pt4.x, pt4.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2); //p4位置
 		height = float(pt2.y - pt3.y);
 		width = float(-pt2.x + pt3.x);
-		//斜率法
-		if (height != 0 && width != 0)
-			slope_up = float(height / width);
-		else if (height) 
-			slope_up = 50;//让斜率大于阈值
-
-		float x = pow(abs(320 - center_point.x), 2);//获取镜头中心与质点的横距离并平方
-		float y = pow(abs(slope_up*(320 - center_point.x)), 2); //获取镜头中心与质点的纵距离，并开平方
-		dst = sqrt(x + y);
-
-		//根据角度分析行进方向
-		if (slope_up >= 13 || slope_up <= -13)
-		{
-			printf("%f", slope_up);
-			return "true";
-		}
-		else if (slope_up > 0)
-		{
-			printf("%f", slope_up);
-			return "left";
-		}
-		else if (slope_up < 0)
-		{
-			printf("%f", slope_up);
-			return "right";
-		}
-
 	}
+	//初中数学斜率法
+	if (height != 0 && width != 0)
+		slope_up = float(height / width);
+	else if (true)
+		slope_up = 50;//让斜率大于阈值
+
+	float x = pow(abs(320 - center_point.x), 2);//获取镜头中心与质点的横距离并平方
+	float y = pow(abs(slope_up*(320 - center_point.x)), 2); //获取镜头中心与质点的纵距离，并开平方
+	dst = sqrt(x + y);
+
+	//根据角度分析行进方向
+	if (slope_up >= 13 || slope_up <= -13)
+	{
+		printf("%f", slope_up);
+		return "true";
+	}
+	else if (slope_up > 0)
+	{
+		printf("%f", slope_up);
+		return "left";
+	}
+	else if (slope_up < 0)
+	{
+		printf("%f", slope_up);
+		return "right";
+	}
+
+
 
 }
 
+/*
+*@brief: 
+*/
 void drawLine(string shape, vector<Point> & approx)
 {
 	Point pt[13];
@@ -76,10 +83,10 @@ void drawLine(string shape, vector<Point> & approx)
 		pt[2] = approx[1];
 		pt[3] = approx[2];
 		pt[4] = approx[3];
-		line(frame, pt[1], pt[2], (0, 255, 0), 3);
-		line(frame, pt[3], pt[2], (0, 255, 0), 3);
-		line(frame, pt[4], pt[3], (0, 255, 0), 3);
-		line(frame, pt[4], pt[1], (0, 255, 0), 3);
+		line(frame, pt[1], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[3], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[3], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[1], Scalar(0, 255, 0), 3);
 	}
 	else if (shape == "pentagon")
 	{
@@ -88,15 +95,26 @@ void drawLine(string shape, vector<Point> & approx)
 		pt[3] = approx[2];
 		pt[4] = approx[3];
 		pt[5] = approx[4];
-		line(frame, pt[1], pt[2], (0, 255, 0), 3);
-		line(frame, pt[3], pt[2], (0, 255, 0), 3);
-		line(frame, pt[4], pt[3], (0, 255, 0), 3);
-		line(frame, pt[4], pt[5], (0, 255, 0), 3);
-		line(frame, pt[5], pt[1], (0, 255, 0), 3);
+		line(frame, pt[1], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[3], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[3], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[5], Scalar(0, 255, 0), 3);
+		line(frame, pt[5], pt[1], Scalar(0, 255, 0), 3);
 	}
 	else if (shape == "cross")
 	{
-
+		pt[1] = approx[0];
+		pt[2] = approx[1];
+		pt[3] = approx[2];
+		pt[4] = approx[3];
+		pt[5] = approx[4];
+		pt[6] = approx[5];
+		line(frame, pt[1], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[3], pt[2], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[3], Scalar(0, 255, 0), 3);
+		line(frame, pt[4], pt[5], Scalar(0, 255, 0), 3);
+		line(frame, pt[5], pt[6], Scalar(0, 255, 0), 3);
+		line(frame, pt[1], pt[1], Scalar(0, 255, 0), 3);
 	}
 
 }
@@ -106,8 +124,8 @@ string detect(vector<Point> cnts_single, vector<Point> & approx)
 {
 	string shape = "undentified";
 	double peri = arcLength(cnts_single, true);
-	approxPolyDP(cnts_single, approx, 0.04 * peri, true);
-	if (approx.size()==3)
+	approxPolyDP(cnts_single, approx, 0.01 * peri, true);
+	if (approx.size() == 3)
 	{
 		shape = "triangle";
 	}
@@ -139,7 +157,7 @@ int main()
 	if (!capture.isOpened())
 	{
 		printf("--(!)Error opening video capture\n"); return -1;
-	}		   
+	}
 	while (capture.read(frame))
 	{
 		//检测2
@@ -150,7 +168,7 @@ int main()
 		}
 		//格式变换
 		Mat imgHSV;
-		cvtColor(frame, imgHSV, COLOR_BGR2HSV);	  
+		cvtColor(frame, imgHSV, COLOR_BGR2HSV);
 
 		Scalar lower_black = Scalar(0, 0, 0);
 		Scalar upper_black = Scalar(255, 255, 46);
@@ -170,7 +188,7 @@ int main()
 		vector<vector<Point>>cnts;//获取了一堆又一堆点
 		findContours(dilate_out, cnts, RETR_EXTERNAL, CHAIN_APPROX_NONE);
 
-		for (int i = 0; i <cnts.size() ; i++)
+		for (int i = 0; i < cnts.size(); i++)
 		{
 			vector<Point> cnts_single = cnts[i];//获取了上面一堆点中的一个点
 			if (cnts_single.size() > 300)
@@ -194,35 +212,35 @@ int main()
 				cout << shape << endl;
 
 				drawLine(shape, approx);  //画矩形
-				
+
 				line(frame, Point(cX, cY), Point(0, cY), Scalar(255, 255, 255), 1);//画质心线
 				line(frame, Point(cX, cY), Point(cX, 0), Scalar(255, 255, 255), 1);
-				
-				putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
+
+				putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
 				line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
-				putText(frame, "position " + to_string(cX) + ", " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);  //质心位置
-				
+				putText(frame, "position " + to_string(cX) + ", " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
+
 				float dst = 0;
-				
+
 				//避免出现三角形时pos_calc()报错
 				if (shape == "rectangle" || shape == "square")
 				{
 					string angle_status = "";
-					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);	 /*报错： 访问权限冲突 */
+					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);	 
 					//小车跑到右边去啦
 					if (cX > 340)
 					{
-						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);  //偏离状态
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);  //偏离状态
+						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance " + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else if (cX < 300)
 					{
-						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);  //偏离状态
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);  //偏离状态
+						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else
 					{
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SCRIPT_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);  //偏离状态
+						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						if (angle_status == "true")
 						{
 							putText(frame, "Correct direction!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
@@ -239,21 +257,16 @@ int main()
 						{
 							putText(frame, "No rectangle!!!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
-
 					}
 				}
-				
 			}
 			else
 			{
-				printf("too fucking small %d\n", cnts_single.size());
+				//printf("too fucking small %d\n", cnts_single.size());
 			}
-
 		}
-
-
 		imshow("Result Frame", frame);
-		if (waitKey(10) == 'q') 
+		if (waitKey(50) == 'q')
 		{
 			break;
 		} // escape
