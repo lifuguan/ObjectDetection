@@ -53,13 +53,13 @@ class ShapeDetector:
         #根据角度分析行进方向
         status = ["true", "left", "right"]
         if slope_up >= 13 or slope_up <= -13:
-            print  slope_up
+            #print  slope_up
             return status[0], dst
         elif slope_up > 0:
-            print slope_up
+            #print slope_up
             return status[2], dst
         elif slope_up < 0:
-            print slope_up
+            #print slope_up
             return status[1], dst
 
         pass
@@ -147,14 +147,13 @@ class ShapeDetector:
 
 
 cap = cv2.VideoCapture(2)
-cap.set(3, 1280)
+cap.set(3, 640)
 cap.set(4, 480)
 while(1):
     # get a frame
     ret, frame = cap.read()
     image = frame
     
-    ratio = image.shape[0] / float(image.shape[0])
 
     # #将格式从BGR——>HSV  HSV颜色区度:https://blog.csdn.net/taily_duan/article/details/51506776
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -162,17 +161,18 @@ while(1):
 
     #设置黑色
     lower_black = np.array([0,0,0])
-    upper_black = np.array([100,100,46])
+    upper_black = np.array([255,255,46])
     #分割图像
-    mask = cv2.inRange(hsv, lower_black, upper_black)
-
     kernel = np.ones((2,2),np.uint8)  
-    erosion = cv2.erode(mask,kernel,iterations = 1)
+    erosion = cv2.erode(hsv,kernel,iterations = 1)
     img = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=4)
+    mask = cv2.inRange(img, lower_black, upper_black)
 
-    cv2.imshow("oengzhang", img)
 
-    cnts = cv2.findContours(img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    cv2.imshow("oengzhang", mask)
+
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     #给cnts降维，对应相应版本的opencv
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
@@ -180,7 +180,8 @@ while(1):
     sd = ShapeDetector()
     for c in cnts:
         #滤掉噪声 (利用面积大小)
-        if c.size > 500 :
+        if c.size > 150 :
+            print "size: ", c.size
             #以下为垃圾代码
             M = cv2.moments(c)
             #返回得到名字
@@ -188,14 +189,11 @@ while(1):
 
             if M["m10"] != 0:
             #表示图像重心
-                cX_ = int((M["m10"] / M["m00"]) * ratio)
-                cY_ = int((M["m01"] / M["m00"]) * ratio)
+                cX_ = int((M["m10"] / M["m00"]) )
+                cY_ = int((M["m01"] / M["m00"]) )
             else :
                 cX = cY = 0
-            #处理一下图片
-            c = c.astype("float")
-            c = ratio * c
-            c = c.astype("int")
+
 
             cv2.line(image, (320, 0) , (320, 480) , (0, 0 , 200), 4) 
             #圈出黑线
@@ -225,15 +223,19 @@ while(1):
                     #在小车位置未偏离的情况下, 传入数据进行位置分析                                                                    
                     cv2.putText(image, "distance " + str(dst), (cX_, cY_+40), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)  #打印偏移距离
                     if angle_status == "true":
-                        cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                        cv2.putText(image, "Correct direction!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  
                     elif angle_status == "left":
-                        cv2.putText(image, "Go right!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                        cv2.putText(image, "Go right!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  
                     elif angle_status == "right":
-                        cv2.putText(image, "Go left!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  #
+                        cv2.putText(image, "Go left!", (320, 100), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  4)  
+            else:
+                print "None rectangle"
+        else:
+            print "too fucking small", c.size
         #图像显示
         cv2.imshow("Image", image)
 
     #cv2.waitKey(0)
-    if cv2.waitKey(50) & 0xFF == ord('q'):
+    if cv2.waitKey(100) & 0xFF == ord('q'):
         break
    
