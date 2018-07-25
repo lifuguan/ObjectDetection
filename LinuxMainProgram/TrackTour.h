@@ -9,11 +9,12 @@
 */
 
 #include <iostream>
-#include <opencv.hpp>
+#include <opencv2/opencv.hpp>
 using namespace std;
 using namespace cv;
 
 Mat frame;
+VideoCapture capture;
 
 /*
 *@brief: 位置分析函数
@@ -45,12 +46,12 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 	if (height != 0 && width != 0)
 		slope_up = float(height / width);
 	else if (true)
-		slope_up = 20;//让斜率大于阈值
+		slope_up = 14;//让斜率大于阈值
 
 	float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
 	float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
 	dst = sqrt(x + y);
-
+	CD_X.slope = slope_up;
 	//根据角度分析行进方向
 	if (slope_up >= 13 || slope_up <= -13)
 	{
@@ -73,7 +74,7 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 }
 
 /*
-*@brief: 
+*@brief:
 */
 void drawLine(string shape, vector<Point> & approx)
 {
@@ -147,11 +148,35 @@ string detect(vector<Point> cnts_single, vector<Point> & approx)
 	return shape;
 }
 
-
-int main()
+//偏移状态的枚举类型
+enum Dirt_Status
 {
-	VideoCapture capture;
-	capture.open(2);
+	correct, left, right
+};
+//位置状态的枚举类型
+enum Pos_Status
+{
+	correct, left, right
+};
+
+//要发送的数据集合
+struct CV_Data
+{
+	int distance;
+	float slope;
+	Dirt_Status ds;	//No need
+	Pos_Status ps;	//No need
+};
+//实例化集合
+CV_Data CD_X;
+
+bool CV_Close = false; //用于关闭摄像头CV
+
+
+int OpenCV_Main(int camID)
+{
+	
+	capture.open(camID);
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);//宽度 
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);//高度
 	//检测1
@@ -227,31 +252,37 @@ int main()
 				if (shape == "rectangle" || shape == "square")
 				{
 					string angle_status = "";
-					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);	 
+					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);
 					//小车跑到右边去啦
 					if (cX > 340)
 					{
+						CD_X.ps = Pos_Status::left;
 						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						putText(frame, "Distance " + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else if (cX < 300)
 					{
+						CD_X.ps = Pos_Status::left;
 						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else
 					{
+						CD_X.ps = Pos_Status::correct;
 						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						if (angle_status == "true")
 						{
+							CD_X.ds = Dirt_Status::correct;
 							putText(frame, "Correct direction!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "left")
 						{
+							CD_X.ds = Dirt_Status::left;
 							putText(frame, "Go right!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "right")
 						{
+							CD_X.ds = Dirt_Status::right;
 							putText(frame, "Go left!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else
@@ -268,7 +299,7 @@ int main()
 		}
 		imshow("Result Frame", frame);
 		//waitKey(50);
-		if (waitKey(50) == 'q')
+		if (waitKey(50) == 'q' || CV_Close == true)
 		{
 			break;
 		} // escape

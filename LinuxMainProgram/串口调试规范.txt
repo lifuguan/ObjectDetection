@@ -1,0 +1,12 @@
+//普通信息
+G0 坐标		X Y Z
+G1 修正坐标  X Y Z
+
+
+//停下时OpenCV发送信息
+G2         D S
+
+欠缺：Windows->Ubuntu的通讯（收， 发）
+	 Ubuntu的处理（）
+	 Ubuntu->STM32的通讯
+
