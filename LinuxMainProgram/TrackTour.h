@@ -19,7 +19,7 @@ VideoCapture capture;
 /*
 *@brief: 位置分析函数
 */
-string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst)
+string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst, int camID)
 {
 	float slope_up = 0;
 	float height = 0.1, width = 0.1;
@@ -51,7 +51,7 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 	float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
 	float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
 	dst = sqrt(x + y);
-	CD_X.slope = slope_up;
+	CD.slope[camID] += slope_up;
 	//根据角度分析行进方向
 	if (slope_up >= 13 || slope_up <= -13)
 	{
@@ -68,10 +68,8 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		printf("%f\n", slope_up);
 		return "right";
 	}
-
-
-
 }
+
 
 /*
 *@brief:
@@ -162,20 +160,21 @@ enum Pos_Status
 //要发送的数据集合
 struct CV_Data
 {
-	int distance;
-	float slope;
+	int distance[2];
+	float slope[2];
 	Dirt_Status ds;	//No need
 	Pos_Status ps;	//No need
 };
+
 //实例化集合
-CV_Data CD_X;
+CV_Data CD;
 
 bool CV_Close = false; //用于关闭摄像头CV
 
 
 int OpenCV_Main(int camID)
 {
-	
+
 	capture.open(camID);
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);//宽度 
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);//高度
@@ -184,8 +183,11 @@ int OpenCV_Main(int camID)
 	{
 		printf("--(!)Error opening video capture\n"); return -1;
 	}
-	while (capture.read(frame))
+	//计时5次， 取平均值
+	int num = 0;
+	while (capture.read(frame) && num < 5)
 	{
+		num++;
 		//检测2
 		if (frame.empty())
 		{
@@ -252,37 +254,40 @@ int OpenCV_Main(int camID)
 				if (shape == "rectangle" || shape == "square")
 				{
 					string angle_status = "";
-					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);
+					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst, camID);
 					//小车跑到右边去啦
 					if (cX > 340)
 					{
-						CD_X.ps = Pos_Status::left;
+						CD.ps = Pos_Status::left;
+						CD.distance[camID] += int(dst);
 						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						putText(frame, "Distance " + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else if (cX < 300)
 					{
-						CD_X.ps = Pos_Status::left;
+						CD.ps = Pos_Status::right;
+						CD.distance[camID] += int(dst);
 						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else
 					{
-						CD_X.ps = Pos_Status::correct;
+						CD.ps = Pos_Status::correct;
+						CD.distance[camID] += int(dst);
 						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						if (angle_status == "true")
 						{
-							CD_X.ds = Dirt_Status::correct;
+							CD.ds = Dirt_Status::correct;
 							putText(frame, "Correct direction!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "left")
 						{
-							CD_X.ds = Dirt_Status::left;
+							CD.ds = Dirt_Status::left;
 							putText(frame, "Go right!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "right")
 						{
-							CD_X.ds = Dirt_Status::right;
+							CD.ds = Dirt_Status::right;
 							putText(frame, "Go left!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else
@@ -301,8 +306,11 @@ int OpenCV_Main(int camID)
 		//waitKey(50);
 		if (waitKey(50) == 'q' || CV_Close == true)
 		{
+			capture.release();
 			break;
 		} // escape
 	}
+	CD.distance[camID] = CD.distance[camID] / 5;
+	CD.slope[camID] = CD.slope[camID] / 5;
 	return 0;
 }

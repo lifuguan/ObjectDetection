@@ -187,8 +187,17 @@ void Trans_Port(int fd, string trans_str)
 *@usage：在到达目的地后调用该函数进行校准数据传输
 */
 void Calibrate_Port(int fd)
-{				
-	OpenCV_Main();
-
-	write(fd, )
+{	
+	int distance_x, distance_y, slope;
+	if (OpenCV_Main(0) == 0)
+	{
+		distance_x = CD.distance[0];
+	}
+	if (OpenCV_Main(1) == 0)
+	{
+		distance_y = CD.distance[1];
+		slope = CD.slope[1];
+	}
+	string pos_string = "G1 X" + to_string(distance_x) + " Y" + to_string(distance_y) + " Z" + to_string(slope) + ";";
+	Trans_Port(fd, pos_string);
 }

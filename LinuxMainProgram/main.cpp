@@ -123,8 +123,11 @@ int main()
 					//平移
 					this_action.dir = 1;
 					this_action.target_point = resource_point_data[j];
-
+					string pos_string = "G0 X" + to_string(this_action.target_point.x / 930 * 930) + " Y" + to_string(this_action.target_point.y) + " Z0" + ";";
+					Trans_Port(fd, pos_string);
 					//moveit();
+					string pos_string = "G0 X0 Y0 Z" + to_string(this_action.target_point.dir) + ";";
+					Trans_Port(fd, pos_string);
 					//getit();//包括this_action.target_point.dir-----底盘旋转方向。
 				}
 				else
@@ -133,25 +136,28 @@ int main()
 					this_action.dir = 1;//dir==1表示平移，dir==0表示直行
 					this_action.target_point.y = this_pos.y;
 					this_action.target_point.x = resource_point_data[j].x / 930 * 930;
-					string pos_string = "G0" + to_string(1) + " X" + to_string(resource_point_data[j].x / 930 * 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
+					string pos_string = "G0 X" + to_string(resource_point_data[j].x / 930 * 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
 					Trans_Port(fd, pos_string);
 					Calibrate_Port(fd);
 					//moveit();//X=this_action.target_point.x//这次移动的目标点的坐标
 					this_action.dir = 0;
 					this_action.target_point.y = resource_point_data[j].y;
 					this_action.target_point.x = this_pos.x;
-					string pos_string = "G0" + to_string(0) + " X" + to_string(this_pos.x) + " Y" + to_string(resource_point_data[j].y) + " Z0" + ";";
+					string pos_string = "G0 X" + to_string(this_pos.x) + " Y" + to_string(resource_point_data[j].y) + " Z0" + ";";
 					Trans_Port(fd, pos_string);
+					Calibrate_Port(fd);
 					//moveit();
 					this_action.dir = 1;
 					this_action.target_point.y = this_pos.y;
 					this_action.target_point.x = resource_point_data[j].x;
-					string pos_string = "G0" + to_string(1) + " X" + to_string(resource_point_data[j].x) + " Y" + to_string(this_pos.y) + " Z0" + ";";
+					string pos_string = "G0 X" + to_string(resource_point_data[j].x) + " Y" + to_string(this_pos.y) + " Z0" + ";";
 					Trans_Port(fd, pos_string);
+					Calibrate_Port(fd);
 					//moveit();
 					this_action.target_point.dir = resource_point_data[j].dir;//底盘旋转方向
-					string pos_string = "G0" + to_string(1) + " X" + to_string(0) + " Y" + to_string(0) + " Z" + to_string(resource_point_data[j].dir) + ";";
+					string pos_string = "G0 X" + to_string(0) + " Y" + to_string(0) + " Z" + to_string(resource_point_data[j].dir) + ";";
 					Trans_Port(fd, pos_string);
+					Calibrate_Port(fd);
 					//getit();//抓取时调用地盘旋转方向，并在抓取结束转回0；
 				}
 
@@ -170,23 +176,28 @@ int main()
 				this_action.dir = 1;
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = this_pos.x / 930 * 930 + 930;
-				string pos_string = "G0" + to_string(1) + " X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
+				string pos_string = "G0 X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
 				Trans_Port(fd, pos_string);
+				Calibrate_Port(fd);
 				//moveit();
 
 				this_action.dir = 0;
 				this_action.target_point.y = work_point_data[j].y;
 				this_action.target_point.x = this_pos.x;
-				string pos_string = "G0" + to_string(1) + " X" + to_string(this_pos.x) + " Y" + to_string(work_point_data[j].y) + " Z0" + ";";
+				string pos_string = "G0 X" + to_string(this_pos.x) + " Y" + to_string(work_point_data[j].y) + " Z0" + ";";
 				Trans_Port(fd, pos_string);
+				Calibrate_Port(fd);
 				//moveit();
 
 				this_action.dir = 1;
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = work_point_data[j].x;
-				string pos_string = "G0" + to_string(1) + " X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
+				string pos_string = "G0 X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
 				Trans_Port(fd, pos_string);
+				Calibrate_Port(fd);
 				//moveit();
+				string pos_string = "G0 X0 Y0 Z" + to_string(this_action.target_point.dir) + ";";
+				Trans_Port(fd, pos_string);
 				//putit();//放下块
 
 			}
