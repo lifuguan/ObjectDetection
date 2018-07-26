@@ -1,32 +1,69 @@
 #include <iostream>
 #include "SerialPort.h"
 #include "data_processing.h"
+#include <lcm/lcm-cpp.hpp>
+#include "head/info_head.hpp"
+#include "normal/info_normal.hpp"
+
 
 using namespace std;
+#define SIZE 10
+char x[SIZE], y[SIZE], angle[SIZE];
+
+/*@brief: 转换函数
+*
+*/
+string FloatToStr(float data)
+{
+	char x[10];
+	sprintf(x, "%.2f", data);
+	string str_data(x);
+	return str_data;
+}
 
 int main()
 {
-	//初始化串口
-	int fd;
-	char *dev = "/dev/ttyTHS2"; //Uart1
+	/*******     初始化UART1,UART4           *******/
+
+	int fd_uart1, fd_uart4;
+	char *UART1 = "/dev/ttyTHS0"; //Uart1
+	char *UART2 = "/dev/ttyS0"; //UART4
 	sleep(1);
-	fd = OpenDev(dev); //1open uart
-	if (fd>0)
+	fd_uart1 = OpenDev(UART1); //open uart1
+	fd_uart4 = OpenDev(UART2); //open uart2
+	if (fd_uart1>0)
 	{
-		set_speed(fd, 19200); //2set speed
+		set_speed(fd_uart1, 19200); //set speed
 	}
 	else
 	{
-		printf("Can't Open Serial Port!\n");
+		printf("Can't Open Serial Port UART1!\n");
 		exit(0);
 	}
-	if (set_Parity(fd, 8, 1, 'N') == FALSE) //3set parity
+
+	if (fd_uart4 > 0)
 	{
-		printf("Set Parity Error\n");
+		set_speed(fd_uart4, 19200); //set speed
+	}
+	else
+	{
+		printf("Can't Open Serial Port UART4!\n");
+		exit(0);
+	}
+
+
+	if (set_Parity(fd_uart1, 8, 1, 'N') == FALSE) //set parity
+	{
+		printf("Set Parity 1  Error\n");
+		exit(1);
+	}
+	if (set_Parity(fd_uart4, 8, 1, 'N') == FALSE) //set parity
+	{
+		printf("Set Parity 4  Error\n");
 		exit(1);
 	}
 
-
+	/***********  初始化LCM    ***********/
 
 	lcm::LCM lcm;
 	if (!lcm.good())
@@ -34,8 +71,9 @@ int main()
 	Point_Data this_pos;
 	Action_Data this_action;
 	Handler handlerObject;
-
 	lcm.subscribe("SENDHEAD", &Handler::handleMessage1, &handlerObject);
+
+	/*******    无限循环      *********/
 	while (1)
 	{
 
@@ -59,7 +97,6 @@ int main()
 			start_data.y = -930 / 2;
 			break;
 		default:
-			lcm.subscribe("SENDHEAD", &Handler::handleMessage1, &handlerObject);
 			break;
 		}
 		this_pos.x = 0;
@@ -123,41 +160,45 @@ int main()
 					//平移
 					this_action.dir = 1;
 					this_action.target_point = resource_point_data[j];
-					string pos_string = "G0 X" + to_string(this_action.target_point.x / 930 * 930) + " Y" + to_string(this_action.target_point.y) + " Z0" + ";";
-					Trans_Port(fd, pos_string);
+					string pos_string = "G1 X" + FloatToStr(this_action.target_point.x / 930 * 930) + " Y" + FloatToStr(this_action.target_point.y) + " A0" + ";";
+					Trans_Port(fd_uart1, pos_string);
+					Calibrate_Port(fd_uart1);
 					//moveit();
-					string pos_string = "G0 X0 Y0 Z" + to_string(this_action.target_point.dir) + ";";
-					Trans_Port(fd, pos_string);
+					string pos_string = "G1 X0 Y0 A" + FloatToStr(this_action.target_point.dir) + ";";
+					Trans_Port(fd_uart1, pos_string);
+					/*****    此处启动抓机   *******/
+
 					//getit();//包括this_action.target_point.dir-----底盘旋转方向。
 				}
 				else
 				{
-					//
 					this_action.dir = 1;//dir==1表示平移，dir==0表示直行
 					this_action.target_point.y = this_pos.y;
 					this_action.target_point.x = resource_point_data[j].x / 930 * 930;
-					string pos_string = "G0 X" + to_string(resource_point_data[j].x / 930 * 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
-					Trans_Port(fd, pos_string);
-					Calibrate_Port(fd);
+					string pos_string = "G1 X" + FloatToStr(resource_point_data[j].x / 930 * 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
+					Trans_Port(fd_uart1, pos_string);
+					Calibrate_Port(fd_uart1);
 					//moveit();//X=this_action.target_point.x//这次移动的目标点的坐标
 					this_action.dir = 0;
 					this_action.target_point.y = resource_point_data[j].y;
 					this_action.target_point.x = this_pos.x;
-					string pos_string = "G0 X" + to_string(this_pos.x) + " Y" + to_string(resource_point_data[j].y) + " Z0" + ";";
-					Trans_Port(fd, pos_string);
-					Calibrate_Port(fd);
+					string pos_string = "G1 X" + FloatToStr(this_pos.x) + " Y" + FloatToStr(resource_point_data[j].y) + " A0" + ";";
+					Trans_Port(fd_uart1, pos_string);
+					Calibrate_Port(fd_uart1);
 					//moveit();
 					this_action.dir = 1;
 					this_action.target_point.y = this_pos.y;
 					this_action.target_point.x = resource_point_data[j].x;
-					string pos_string = "G0 X" + to_string(resource_point_data[j].x) + " Y" + to_string(this_pos.y) + " Z0" + ";";
-					Trans_Port(fd, pos_string);
-					Calibrate_Port(fd);
+					string pos_string = "G1 X" + FloatToStr(resource_point_data[j].x) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
+					Trans_Port(fd_uart1, pos_string);
+					Calibrate_Port(fd_uart1);
 					//moveit();
 					this_action.target_point.dir = resource_point_data[j].dir;//底盘旋转方向
-					string pos_string = "G0 X" + to_string(0) + " Y" + to_string(0) + " Z" + to_string(resource_point_data[j].dir) + ";";
-					Trans_Port(fd, pos_string);
-					Calibrate_Port(fd);
+					string pos_string = "G1 X" + FloatToStr(0) + " Y" + FloatToStr(0) + " A" + FloatToStr(resource_point_data[j].dir) + ";";
+					Trans_Port(fd_uart1, pos_string);
+					Calibrate_Port(fd_uart1);
+					/*****    此处启动抓机   *******/
+
 					//getit();//抓取时调用地盘旋转方向，并在抓取结束转回0；
 				}
 
@@ -176,29 +217,31 @@ int main()
 				this_action.dir = 1;
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = this_pos.x / 930 * 930 + 930;
-				string pos_string = "G0 X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
-				Trans_Port(fd, pos_string);
-				Calibrate_Port(fd);
+				string pos_string = "G1 X" + FloatToStr(this_pos.x / 930 * 930 + 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
+				Trans_Port(fd_uart1, pos_string);
+				Calibrate_Port(fd_uart1);
 				//moveit();
 
 				this_action.dir = 0;
 				this_action.target_point.y = work_point_data[j].y;
 				this_action.target_point.x = this_pos.x;
-				string pos_string = "G0 X" + to_string(this_pos.x) + " Y" + to_string(work_point_data[j].y) + " Z0" + ";";
-				Trans_Port(fd, pos_string);
-				Calibrate_Port(fd);
+				string pos_string = "G1 X" + FloatToStr(this_pos.x) + " Y" + FloatToStr(work_point_data[j].y) + " A0" + ";";
+				Trans_Port(fd_uart1, pos_string);
+				Calibrate_Port(fd_uart1);
 				//moveit();
 
 				this_action.dir = 1;
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = work_point_data[j].x;
-				string pos_string = "G0 X" + to_string(this_pos.x / 930 * 930 + 930) + " Y" + to_string(this_pos.y) + " Z0" + ";";
-				Trans_Port(fd, pos_string);
-				Calibrate_Port(fd);
+				string pos_string = "G1 X" + FloatToStr(this_pos.x / 930 * 930 + 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
+				Trans_Port(fd_uart1, pos_string);
+				Calibrate_Port(fd_uart1);
 				//moveit();
-				string pos_string = "G0 X0 Y0 Z" + to_string(this_action.target_point.dir) + ";";
-				Trans_Port(fd, pos_string);
+				string pos_string = "G1 X0 Y0 A" + FloatToStr(this_action.target_point.dir) + ";";
+				Trans_Port(fd_uart1, pos_string);
 				//putit();//放下块
+				/*******    此处启动抓机   *******/
+
 
 			}
 
@@ -206,7 +249,7 @@ int main()
 		while (0 == lcm.handle());
 
 	}	   
-	close(fd);
+	close(fd_uart1);
 	exit(0);
 	return 0;
 }

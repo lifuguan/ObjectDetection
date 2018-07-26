@@ -16,11 +16,32 @@ using namespace cv;
 Mat frame;
 VideoCapture capture;
 
+string IntToStr(int data)
+{
+	char ch_str[10] = { 0 };
+	sprintf(ch_str, "%d", data);
+	string  str_data(ch_str);
+	return str_data;
+}
+/*@brief: 求点到直线距离
+*         点斜式大法好
+*/
+int dst_calc(int x1, int y1, int x2, int y2, int tar_x = 320, int tar_y = 240)
+{
+	double A, B, C, dst;
+	A = y2 - y1;
+	B = x1 - x2;
+	C = x2 * y1 - x1 * y2;
+	dst = abs(A*tar_x + B * tar_y + C) / sqrt(A*A + B * B);
+	return int(dst);
+}
+
 /*
 *@brief: 位置分析函数
 */
 string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst, int camID)
 {
+	int dst = 0, line_x1, line_x2, line_y1, line_y2;
 	float slope_up = 0;
 	float height = 0.1, width = 0.1;
 	if (pt2.y + 10 > 200)
@@ -29,6 +50,12 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		putText(frame, "p2", Point(pt2.x, pt2.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p2位置
 		putText(frame, "p3 ", Point(pt3.x, pt3.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p3位置
 		putText(frame, "p4 ", Point(pt4.x, pt4.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p4位置
+		line_x1 = (pt1.x + pt4.x) / 2;
+		line_x2 = (pt2.x + pt3.x) / 2;
+		line_y1 = (pt1.y + pt4.y) / 2;
+		line_y2 = (pt2.y + pt3.y) / 2;
+		dst = dst_calc(line_x1, line_x2, line_y1, line_y2);
+
 		height = float(pt1.y - pt2.y);
 		width = float(-pt1.x + pt2.x);
 	}
@@ -39,8 +66,21 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		putText(frame, "p2 ", Point(pt2.x, pt2.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);  //p2位置
 		putText(frame, "p3 ", Point(pt3.x, pt3.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2); //p3位置
 		putText(frame, "p4 ", Point(pt4.x, pt4.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2); //p4位置
+		
+		line_x1 = (pt1.x + pt2.x) / 2;
+		line_x2 = (pt4.x + pt3.x) / 2;
+		line_y1 = (pt1.y + pt2.y) / 2;
+		line_y2 = (pt4.y + pt3.y) / 2;
+		dst = dst_calc(line_x1, line_x2, line_y1, line_y2);
+		
 		height = float(pt2.y - pt3.y);
 		width = float(-pt2.x + pt3.x);
+	}
+	else
+	{
+		float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
+		float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
+		dst = sqrt(x + y);
 	}
 	//初中数学斜率法
 	if (height != 0 && width != 0)
@@ -48,9 +88,7 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 	else if (true)
 		slope_up = 14;//让斜率大于阈值
 
-	float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
-	float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
-	dst = sqrt(x + y);
+
 	CD.slope[camID] += slope_up;
 	//根据角度分析行进方向
 	if (slope_up >= 13 || slope_up <= -13)
@@ -246,7 +284,7 @@ int OpenCV_Main(int camID)
 
 				putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
 				line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
-				putText(frame, "position " + to_string(cX) + ", " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
+				putText(frame, "position " + (cX) + " , " + IntToStr(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
 
 				float dst = 0;
 
@@ -261,20 +299,20 @@ int OpenCV_Main(int camID)
 						CD.ps = Pos_Status::left;
 						CD.distance[camID] += int(dst);
 						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
-						putText(frame, "Distance " + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance " + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else if (cX < 300)
 					{
 						CD.ps = Pos_Status::right;
 						CD.distance[camID] += int(dst);
 						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else
 					{
 						CD.ps = Pos_Status::correct;
 						CD.distance[camID] += int(dst);
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						if (angle_status == "true")
 						{
 							CD.ds = Dirt_Status::correct;

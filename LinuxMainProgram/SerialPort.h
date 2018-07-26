@@ -153,23 +153,26 @@ int OpenDev(char *Dev)
 }
 
 /*
-*@breif  传输运动数据
+*@breif:  传输运动数据
+*@usage:  发送数据然后等待回传
 */
 void Trans_Port(int fd, string trans_str)
 {
 	char buff[512];
+	bool checkStauts = false;
+	int nread;
+
+	write(fd, trans_str.c_str(), trans_str.length());
+	//读取返回信息
 	while (true)
 	{
-		bool checkStauts = false;
-		int nread;
-		//读取返回信息
-		if (nread = read(fd, buff, 512)>0)
+
+		if (nread = read(fd, buff, 512) > 0)
 		{
 			buff[nread] = '\0';
 			//读取到OK则执行操作
 			if (buff == "OK")
 			{
-				write(fd, &trans_str , trans_str.length());
 				checkStauts = true;
 			}
 		}
@@ -177,7 +180,6 @@ void Trans_Port(int fd, string trans_str)
 		{
 			break;
 		}
-		sleep(1);
 	}
 }
 
@@ -187,7 +189,7 @@ void Trans_Port(int fd, string trans_str)
 *@usage：在到达目的地后调用该函数进行校准数据传输
 */
 void Calibrate_Port(int fd)
-{	
+{
 	int distance_x, distance_y, slope;
 	if (OpenCV_Main(0) == 0)
 	{
@@ -198,6 +200,28 @@ void Calibrate_Port(int fd)
 		distance_y = CD.distance[1];
 		slope = CD.slope[1];
 	}
-	string pos_string = "G1 X" + to_string(distance_x) + " Y" + to_string(distance_y) + " Z" + to_string(slope) + ";";
+	string pos_string = "G1 X" + FloatToStr(distance_x) + " Y" + FloatToStr(distance_y) + " Z" + FloatToStr(slope) + ";";
 	Trans_Port(fd, pos_string);
+
+	char buff[512];
+	bool checkStauts = false;
+	int nread;
+
+	//读取返回确认信息
+	while (true)
+	{
+		if (nread = read(fd, buff, 512) > 0)
+		{
+			buff[nread] = '\0';
+			//读取到OK则执行操作
+			if (buff == "OK")
+			{
+				checkStauts = true;
+			}
+		}
+		if (checkStauts == true)   // 如果接收到OK， 立即退出循环
+		{
+			break;
+		}
+	}
 }
