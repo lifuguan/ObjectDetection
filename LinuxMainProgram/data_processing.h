@@ -160,20 +160,21 @@ public:
 				//moveit();
 				string pos_string = "G1 X" + FloatToStr(this_action.target_point.x / 930 * 930) + " Y" + FloatToStr(this_action.target_point.y) + " A0" + ";";
 				Trans_Port(fd_uart1, pos_string);
-				Calibrate_Port(fd_uart1);
+				system("./a.out");
+				//Calibrate_Port(fd_uart1);
 				string pos_string = "G1 X0 Y0 A" + FloatToStr(this_action.target_point.dir) + ";";
 				Trans_Port(fd_uart1, pos_string);
 				//getit();//包括this_action.target_point.dir-----底盘旋转方向。
 			}
 			else
 			{
-
+				 
 				this_action.dir = 1;//dir==1表示平移，dir==0表示直行
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = this_pos.x / 930 * 930 + 930;
 				string pos_string = "G1 X" + FloatToStr(resource_point_data[j].x / 930 * 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
 				Trans_Port(fd_uart1, pos_string);
-				Calibrate_Port(fd_uart1);
+				Calibrate_Port(fd_uart1);	
 
 				//moveit();//X=this_action.target_point.x//这次移动的目标点的坐标
 				this_action.dir = 0;
@@ -181,19 +182,22 @@ public:
 				this_action.target_point.x = this_pos.x;
 				string pos_string = "G1 X" + FloatToStr(this_pos.x) + " Y" + FloatToStr(resource_point_data[j].y) + " A0" + ";";
 				Trans_Port(fd_uart1, pos_string);
-				Calibrate_Port(fd_uart1);
+				system("./a.out");
+				//Calibrate_Port(fd_uart1);
 				//moveit();
 				this_action.dir = 1;
 				this_action.target_point.y = this_pos.y;
 				this_action.target_point.x = resource_point_data[j].x;
 				string pos_string = "G1 X" + FloatToStr(resource_point_data[j].x) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
 				Trans_Port(fd_uart1, pos_string);
-				Calibrate_Port(fd_uart1);
+				system("./a.out");
+				//Calibrate_Port(fd_uart1);
 				//moveit();
 				this_action.target_point.dir = resource_point_data[j].dir;//底盘旋转方向
 				string pos_string = "G1 X" + FloatToStr(0) + " Y" + FloatToStr(0) + " A" + FloatToStr(resource_point_data[j].dir) + ";";
 				Trans_Port(fd_uart1, pos_string);
-				Calibrate_Port(fd_uart1);
+				system("./a.out");
+				//Calibrate_Port(fd_uart1);
 																		  //getit();//抓取时调用地盘旋转方向，并在抓取结束转回0；
 			}
 
@@ -206,29 +210,33 @@ public:
 
 			int y = (id - 1) / 8;
 			int x = (id - 1) % 8;
-			work_point_data[j].x = 930 * x + 930 / 2;
+			work_point_data[j].x = 930 * x;
+			// +930 / 2;
 			work_point_data[j].y = 930 * y;
-
+			
 			this_action.dir = 1;
 			this_action.target_point.y = this_pos.y;
 			this_action.target_point.x = this_pos.x / 930 * 930 + 930;
 			string pos_string = "G1 X" + FloatToStr(this_pos.x / 930 * 930 + 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
 			Trans_Port(fd_uart1, pos_string);
-			Calibrate_Port(fd_uart1);
+			system("./a.out");			  
+			//Calibrate_Port(fd_uart1);
 			//moveit();
 			this_action.dir = 0;
 			this_action.target_point.y = work_point_data[j].y;
 			this_action.target_point.x = this_pos.x;
 			string pos_string = "G1 X" + FloatToStr(this_pos.x) + " Y" + FloatToStr(work_point_data[j].y) + " A0" + ";";
 			Trans_Port(fd_uart1, pos_string);
-			Calibrate_Port(fd_uart1);
+			system("./a.out");
+			//Calibrate_Port(fd_uart1);
 			//moveit();
 			this_action.dir = 1;
 			this_action.target_point.y = this_pos.y;
 			this_action.target_point.x = work_point_data[j].x;
 			string pos_string = "G1 X" + FloatToStr(this_pos.x / 930 * 930 + 930) + " Y" + FloatToStr(this_pos.y) + " A0" + ";";
 			Trans_Port(fd_uart1, pos_string);
-			Calibrate_Port(fd_uart1);
+			system("./a.out");
+			//Calibrate_Port(fd_uart1);
 			//moveit();
 			string pos_string = "G1 X0 Y0 A" + FloatToStr(this_action.target_point.dir) + ";";
 			Trans_Port(fd_uart1, pos_string);

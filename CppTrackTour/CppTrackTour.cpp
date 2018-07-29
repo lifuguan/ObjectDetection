@@ -7,19 +7,53 @@
 @refer: https://www.opencv-python-tutroals.readthedocs.io
 @location: DJI
 */
-
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
-#include <opencv.hpp>
+#include <opencv2/opencv.hpp>
 using namespace std;
 using namespace cv;
 
 Mat frame;
+VideoCapture capture;
+
+//要发送的数据集合
+struct CV_Data
+{
+	int distance[2];
+	float slope[2];
+};
+
+//实例化集合
+CV_Data CD;
+
+string IntToStr(int data)
+{
+	char ch_str[10] = { 0 };
+	sprintf(ch_str, "%d", data);
+	string  str_data(ch_str);
+	return str_data;
+}
+/*@brief: 求点到直线距离
+*         点斜式大法好
+*/
+int dst_calc(int x1, int y1, int x2, int y2, int tar_x = 320, int tar_y = 240)
+{
+	line(frame, Point(x1,y1), Point(x2, y2), Scalar(0, 155, 155), 3);
+	double A, B, C, dst;
+	A = y2 - y1;
+	B = x1 - x2;
+	C = x2 * y1 - x1 * y2;
+	dst = abs(A*tar_x + B * tar_y + C) / sqrt(A*A + B * B);
+	return int(dst);
+}
 
 /*
 *@brief: 位置分析函数
 */
-string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst)
+string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_point, float &dst, int camID)
 {
+	dst = 0;
+	int  line_x1, line_x2, line_y1, line_y2;
 	float slope_up = 0;
 	float height = 0.1, width = 0.1;
 	if (pt2.y + 10 > 200)
@@ -28,6 +62,12 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		putText(frame, "p2", Point(pt2.x, pt2.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p2位置
 		putText(frame, "p3 ", Point(pt3.x, pt3.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p3位置
 		putText(frame, "p4 ", Point(pt4.x, pt4.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);//p4位置
+		line_x1 = (pt1.x + pt4.x) / 2;
+		line_x2 = (pt2.x + pt3.x) / 2;
+		line_y1 = (pt1.y + pt4.y) / 2;
+		line_y2 = (pt2.y + pt3.y) / 2;
+		dst = dst_calc(line_x1, line_y1, line_x2, line_y2);
+
 		height = float(pt1.y - pt2.y);
 		width = float(-pt1.x + pt2.x);
 	}
@@ -38,19 +78,30 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		putText(frame, "p2 ", Point(pt2.x, pt2.y + 10), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2);  //p2位置
 		putText(frame, "p3 ", Point(pt3.x, pt3.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2); //p3位置
 		putText(frame, "p4 ", Point(pt4.x, pt4.y - 5), FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2); //p4位置
+
+		line_x1 = (pt1.x + pt2.x) / 2;
+		line_x2 = (pt4.x + pt3.x) / 2;
+		line_y1 = (pt1.y + pt2.y) / 2;
+		line_y2 = (pt4.y + pt3.y) / 2;
+		dst = -dst_calc(line_x1, line_x2, line_y1, line_y2);
+
 		height = float(pt2.y - pt3.y);
 		width = float(-pt2.x + pt3.x);
+	}
+	else
+	{
+		float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
+		float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
+		dst = sqrt(x + y);
 	}
 	//初中数学斜率法
 	if (height != 0 && width != 0)
 		slope_up = float(height / width);
-	else if (true)
-		slope_up = 20;//让斜率大于阈值
+	//else if (true)
+	//	slope_up = 14;//让斜率大于阈值
 
-	float x = abs(320 - center_point.x) * abs(320 - center_point.x);//获取镜头中心与质点的横距离并平方
-	float y = abs((240 - center_point.y)) * abs((240 - center_point.y)); //获取镜头中心与质点的纵距离，并开平方
-	dst = sqrt(x + y);
 
+	CD.slope[1] += slope_up;
 	//根据角度分析行进方向
 	if (slope_up >= 13 || slope_up <= -13)
 	{
@@ -67,13 +118,11 @@ string pos_calc(Point pt1, Point  pt2, Point  pt3, Point  pt4, Point  center_poi
 		printf("%f\n", slope_up);
 		return "right";
 	}
-
-
-
 }
 
+
 /*
-*@brief: 
+*@brief:
 */
 void drawLine(string shape, vector<Point> & approx)
 {
@@ -125,7 +174,7 @@ string detect(vector<Point> cnts_single, vector<Point> & approx)
 {
 	string shape = "undentified";
 	double peri = arcLength(cnts_single, true);
-	approxPolyDP(cnts_single, approx, 0.01 * peri, true);
+	approxPolyDP(cnts_single, approx, 0.045 * peri, true);
 	if (approx.size() == 3)
 	{
 		shape = "triangle";
@@ -148,19 +197,28 @@ string detect(vector<Point> cnts_single, vector<Point> & approx)
 }
 
 
+
+
+
+bool CV_Close = false; //用于关闭摄像头CV
+
+
 int main()
 {
-	VideoCapture capture;
+
 	capture.open(2);
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);//宽度 
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);//高度
-	//检测1
+											   //检测1
 	if (!capture.isOpened())
 	{
 		printf("--(!)Error opening video capture\n"); return -1;
 	}
+	//计时5次， 取平均值
+	int num = 0;
 	while (capture.read(frame))
 	{
+		num++;
 		//检测2
 		if (frame.empty())
 		{
@@ -168,11 +226,13 @@ int main()
 			break;
 		}
 		//格式变换
-		Mat imgHSV;
-		cvtColor(frame, imgHSV, COLOR_BGR2HSV);
-
+		Mat imgHSV_ori, imgHSV;
+		cvtColor(frame, imgHSV_ori, COLOR_BGR2HSV);
+		Rect rect(0, 150, 640, 330);
+		imgHSV = imgHSV_ori(rect);
+		frame = imgHSV;
 		Scalar lower_black = Scalar(0, 0, 0);
-		Scalar upper_black = Scalar(255, 255, 46);
+		Scalar upper_black = Scalar(180, 255, 80);
 		//取颜色范围
 		Mat imgThresHold;
 		inRange(imgHSV, lower_black, upper_black, imgThresHold);
@@ -219,7 +279,7 @@ int main()
 
 				putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
 				line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
-				putText(frame, "position " + to_string(cX) + ", " + to_string(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
+				putText(frame, "position " + IntToStr(cX) + " , " + IntToStr(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
 
 				float dst = 0;
 
@@ -227,31 +287,40 @@ int main()
 				if (shape == "rectangle" || shape == "square")
 				{
 					string angle_status = "";
-					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst);	 
+					angle_status = pos_calc(approx[0], approx[1], approx[2], approx[3], Point(cX, cY), dst, 1);
 					//小车跑到右边去啦
 					if (cX > 340)
 					{
+					
+						CD.distance[1] += int(dst);
 						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
-						putText(frame, "Distance " + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance " + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else if (cX < 300)
 					{
+				
+						CD.distance[1] += int(dst);
 						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 					}
 					else
 					{
-						putText(frame, "Distance" + to_string(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
+	
+						CD.distance[1] += int(dst);
+						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //偏离状态
 						if (angle_status == "true")
 						{
+							
 							putText(frame, "Correct direction!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "left")
 						{
+						
 							putText(frame, "Go right!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "right")
 						{
+					
 							putText(frame, "Go left!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else
@@ -268,10 +337,15 @@ int main()
 		}
 		imshow("Result Frame", frame);
 		//waitKey(50);
-		if (waitKey(50) == 'q')
+		if (waitKey(50) == 'q' || CV_Close == true)
 		{
+			capture.release();
 			break;
 		} // escape
 	}
+	CD.distance[1] = CD.distance[1] / 5;
+	CD.slope[1] = CD.slope[1] / 5;
+	cout << CD.distance[1] << "      " << CD.slope[1] << endl;
+	system("pause");
 	return 0;
 }

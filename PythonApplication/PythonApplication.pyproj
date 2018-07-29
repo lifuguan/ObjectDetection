@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>eb85a151-71c1-4212-aaa8-943250796c74</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>TrackTour.py</StartupFile>
+    <StartupFile>changeColor.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,6 +28,9 @@ C:\opencv\build\include;</Environment>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="changeColor.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ColorAndShapeDetect.py">
       <SubType>Code</SubType>
     </Compile>

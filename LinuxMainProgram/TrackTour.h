@@ -284,7 +284,7 @@ int OpenCV_Main(int camID)
 
 				putText(frame, "black line " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
 				line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
-				putText(frame, "position " + (cX) + " , " + IntToStr(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
+				putText(frame, "position " + IntToStr(cX) + " , " + IntToStr(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
 
 				float dst = 0;
 

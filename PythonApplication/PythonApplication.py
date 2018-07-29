@@ -83,12 +83,9 @@ def v_low(value):
 
 #brief: 主函数
 if __name__=='__main__':
-    #image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\real1.jpg", cv2.IMREAD_COLOR)
-    
-    #emmmm, 我觉得这段代码可以使用以下一行带过
-    #image = cv2.imread("image")
 
-    cap = cv2.VideoCapture(1)
+
+    cap = cv2.VideoCapture(2)
     while(1):
         # get a frame
         ret, frame = cap.read()
@@ -154,6 +151,6 @@ if __name__=='__main__':
                 #cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
                 cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255),  2)
 	            # show the output image
-        cv2.imshow("Image", image)
+            cv2.imshow("Image", image)
 
 

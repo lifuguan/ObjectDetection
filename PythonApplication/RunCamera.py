@@ -8,11 +8,11 @@ import numpy as np
      并通过滑块调节HSV阈值，实时显示
 """
 
-image = cv2.imread('C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\black1.jpg') # 根据路径读取一张图片
+image = cv2.imread('C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\black4.jpg') # 根据路径读取一张图片
 cv2.imshow("BGR", image) # 显示图片
 
 hsv_low =  np.array([0,0, 0])
-hsv_high = np.array([255,255,46])
+hsv_high = np.array([180,255,46])
 
 # 下面几个函数，写得有点冗余
 

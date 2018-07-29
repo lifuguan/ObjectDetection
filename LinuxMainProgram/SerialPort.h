@@ -21,6 +21,8 @@
 #include "TrackTour.h"
 
 
+
+
 /*@brief  设置串口通信速率
 *@param  fd     类型 int  打开串口的文件句柄
 *@param  speed  类型 int  串口速度
@@ -163,24 +165,6 @@ void Trans_Port(int fd, string trans_str)
 	int nread;
 
 	write(fd, trans_str.c_str(), trans_str.length());
-	//读取返回信息
-	while (true)
-	{
-
-		if (nread = read(fd, buff, 512) > 0)
-		{
-			buff[nread] = '\0';
-			//读取到OK则执行操作
-			if (buff == "OK")
-			{
-				checkStauts = true;
-			}
-		}
-		if (checkStauts == true)   // 如果接收到OK， 立即退出循环
-		{
-			break;
-		}
-	}
 }
 
 
@@ -200,28 +184,12 @@ void Calibrate_Port(int fd)
 		distance_y = CD.distance[1];
 		slope = CD.slope[1];
 	}
-	string pos_string = "G1 X" + FloatToStr(distance_x) + " Y" + FloatToStr(distance_y) + " Z" + FloatToStr(slope) + ";";
+	string pos_string = "G1 X" + IntToStr(distance_x) + " Y" + IntToStr(distance_y) + " Z" + IntToStr(slope) + ";";
 	Trans_Port(fd, pos_string);
 
 	char buff[512];
 	bool checkStauts = false;
 	int nread;
 
-	//读取返回确认信息
-	while (true)
-	{
-		if (nread = read(fd, buff, 512) > 0)
-		{
-			buff[nread] = '\0';
-			//读取到OK则执行操作
-			if (buff == "OK")
-			{
-				checkStauts = true;
-			}
-		}
-		if (checkStauts == true)   // 如果接收到OK， 立即退出循环
-		{
-			break;
-		}
-	}
+	
 }
