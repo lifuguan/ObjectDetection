@@ -84,7 +84,7 @@ class ShapeDetector:
 
 #brief: 主函数
 if __name__=='__main__':
-    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\real1.jpg", cv2.IMREAD_COLOR)
+    image = cv2.imread("C:\\Users\\10027\\source\\repos\\ObjectDetection\\PythonApplication\\RoboSample\\mix\\mix2.jpg", cv2.IMREAD_COLOR)
     
     #emmmm, 我觉得这段代码可以使用以下一行带过
     #image = cv2.imread("image")

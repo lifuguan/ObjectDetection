@@ -38,7 +38,7 @@ string IntToStr(int data)
 */
 int dst_calc(int x1, int y1, int x2, int y2, int tar_x = 320, int tar_y = 240)
 {
-	line(frame, Point(x1,y1), Point(x2, y2), Scalar(0, 155, 155), 3);
+	line(frame, Point(x1, y1), Point(x2, y2), Scalar(0, 155, 155), 3);
 	double A, B, C, dst;
 	A = y2 - y1;
 	B = x1 - x2;
@@ -291,36 +291,36 @@ int main()
 					//Ð¡³µÅÜµ½ÓÒ±ßÈ¥À²
 					if (cX > 340)
 					{
-					
+
 						CD.distance[1] += int(dst);
 						putText(frame, "Left Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //Æ«Àë×´Ì¬
 						putText(frame, "Distance " + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //Æ«Àë×´Ì¬
 					}
 					else if (cX < 300)
 					{
-				
+
 						CD.distance[1] += int(dst);
 						putText(frame, "Right Off", Point(340, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //Æ«Àë×´Ì¬
 						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //Æ«Àë×´Ì¬
 					}
 					else
 					{
-	
+
 						CD.distance[1] += int(dst);
 						putText(frame, "Distance" + IntToStr(int(dst)), Point(cX, cY + 40), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);  //Æ«Àë×´Ì¬
 						if (angle_status == "true")
 						{
-							
+
 							putText(frame, "Correct direction!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "left")
 						{
-						
+
 							putText(frame, "Go right!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else if (angle_status == "right")
 						{
-					
+
 							putText(frame, "Go left!", Point(320, 100), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 4);
 						}
 						else

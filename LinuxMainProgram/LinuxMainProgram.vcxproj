@@ -68,11 +68,6 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data_processing.h" />
-    <ClInclude Include="SerialPort.h" />
-    <ClInclude Include="TrackTour.h" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="串口调试规范.txt" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

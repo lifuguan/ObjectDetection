@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>eb85a151-71c1-4212-aaa8-943250796c74</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>changeColor.py</StartupFile>
+    <StartupFile>imgtest.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
