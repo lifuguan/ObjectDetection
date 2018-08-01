@@ -17,9 +17,8 @@
 #include <errno.h>      /*错误号定义*/
 #include <string.h>
 #include <string>
-
-#include "TrackTour.h"
-
+#include <iostream>
+using namespace std;
 
 
 
@@ -30,6 +29,7 @@
 */
 #define FALSE 1
 #define TRUE 0
+
 
 char *recchr = "We received:\"";
 
@@ -165,31 +165,14 @@ void Trans_Port(int fd, string trans_str)
 	int nread;
 
 	write(fd, trans_str.c_str(), trans_str.length());
+	cout << trans_str << endl;
+	close(fd);
+	exit(0);
+	system("./TrackTour");
 }
 
 
-/*
-*@brief: 传输摄像头校准数据
-*@usage：在到达目的地后调用该函数进行校准数据传输
-*/
-void Calibrate_Port(int fd)
-{
-	int distance_x, distance_y, slope;
-	if (OpenCV_Main(0) == 0)
-	{
-		distance_x = CD.distance[0];
-	}
-	if (OpenCV_Main(1) == 0)
-	{
-		distance_y = CD.distance[1];
-		slope = CD.slope[1];
-	}
-	string pos_string = "G1 X" + IntToStr(distance_x) + " Y" + IntToStr(distance_y) + " Z" + IntToStr(slope) + ";";
-	Trans_Port(fd, pos_string);
 
-	char buff[512];
-	bool checkStauts = false;
-	int nread;
 
-	
-}
+
+
