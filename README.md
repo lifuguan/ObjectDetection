@@ -1,9 +1,9 @@
 ObjectDetection, serial communication and data process in Manifold (DJI).
+=========================================================================
 
 (Solution for RoboMaster 2018 summer camp)
 
-Referred documents
-------------------
+#### Referred documents
 
 -   Lightweight Communications and Marshalling (LCM):
 
@@ -13,7 +13,7 @@ http://lcm-proj.github.io/
 
     -   Python:
 
->   <http://opencv-python->tutrols.readthedocs.io/en/latest/index.html
+>   http://opencv-python-tutroals.readthedocs.io/en/latest/index.html
 
 -   C++:
 
@@ -21,8 +21,7 @@ http://lcm-proj.github.io/
 
 https://docs.opencv.org/
 
-Projects instruction
---------------------
+### Projects instruction
 
 ![](media/9ba87b08005764e67dfdc461fbf1d53f.png)
 
@@ -50,6 +49,5 @@ Projects instruction
         stream from MacBook, process the data and transport the data to the
         MCU(STM32)
 
--   PythonApplication: Varieties of opencv program (using Python2.7),
-
->   Such as Shape detection, track tour, and so on.
+-   PythonApplication: Varieties of opencv program (using Python2.7),Such as
+    Shape detection, track tour, and so on.
