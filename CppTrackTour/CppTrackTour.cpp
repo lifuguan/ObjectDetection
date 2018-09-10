@@ -206,7 +206,7 @@ bool CV_Close = false; //用于关闭摄像头CV
 int main()
 {
 
-	capture.open(2);
+	capture.open("C:\\Users\\10027\\Pictures\\Camera Roll\\test2.jpg");
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);//宽度 
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);//高度
 											   //检测1

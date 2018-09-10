@@ -182,7 +182,6 @@ int main()
 
 				line(frame, Point(cX, cY), Point(0, cY), Scalar(255, 255, 255), 1);//画质心线
 				line(frame, Point(cX, cY), Point(cX, 0), Scalar(255, 255, 255), 1);
-
 				putText(frame, "shape: " + shape, Point(cX, cY), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255), 2);
 				line(frame, Point(cX, cY), Point(cX, cY), (255, 255, 255), 5);
 				putText(frame, "position " + IntToStr(cX) + " , " + IntToStr(cY), Point(cX, cY + 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 255), 2);  //质心位置
