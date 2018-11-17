@@ -94,8 +94,6 @@ int width;
 
 int main()
 {
-	/*"C:\\Users\\10027\\Pictures\\Camera Roll\\final2.mp4"*/
-	//frame = imread("C:\\Users\\10027\\Pictures\\Camera Roll\\final3_Moment.jpg");
 	capture.open("C:\\Users\\10027\\Pictures\\Camera Roll\\final2.mp4");
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);//¿í¶È 
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);//¸ß¶È

@@ -1,5 +1,5 @@
-ObjectDetection, serial communication and data process in Manifold (DJI).
-=========================================================================
+ObjectDetection, serial communication and data process in Manifold (DJI)
+========================================================================
 
 (Solution for RoboMaster 2018 summer camp)
 

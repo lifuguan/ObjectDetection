@@ -199,7 +199,6 @@ string detect(vector<Point> cnts_single, vector<Point> & approx)
 
 
 
-
 bool CV_Close = false; //用于关闭摄像头CV
 
 
